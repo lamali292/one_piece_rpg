@@ -1,0 +1,500 @@
+{
+  "brawler_skill_1": {
+    "description": {
+      "translate": "skill.one_piece_content.brawler_skill_1.description"
+    },
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:iron_ingot"
+      }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "multiply_base",
+          "value": 0.08
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.brawler_skill_1.title"
+    }
+  },
+  "brawler_skill_2": {
+    "description": {
+      "translate": "skill.one_piece_content.brawler_skill_2.description"
+    },
+    "icon": {
+      "type": "effect",
+      "data": {
+        "effect": "minecraft:strength"
+      }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.attack_speed",
+          "operation": "multiply_base",
+          "value": 0.15
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.brawler_skill_2.title"
+    }
+  },
+  "brawler_skill_3": {
+    "description": {
+      "translate": "skill.one_piece_content.brawler_skill_3.description"
+    },
+    "icon": {
+      "type": "effect",
+      "data": {
+        "effect": "minecraft:strength"
+      }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.armor",
+          "operation": "addition",
+          "value": 2.0
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.brawler_skill_3.title"
+    }
+  },
+  "dummy": {
+    "description": {
+      "translate": "skill.one_piece_content.dummy.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/dummy.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:dummy"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.dummy.title"
+    }
+  },
+  "quicksand": {
+    "description": {
+      "translate": "skill.one_piece_content.quicksand.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/quicksand.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:quicksand"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.quicksand.title"
+    }
+  },
+  "sand_blade": {
+    "description": {
+      "translate": "skill.one_piece_content.sand_blade.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/sand_blade.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:sand_blade"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sand_blade.title"
+    }
+  },
+  "sand_drain": {
+    "description": {
+      "translate": "skill.one_piece_content.sand_drain.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/sand_drain.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:sand_drain"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sand_drain.title"
+    }
+  },
+  "sand_hand": {
+    "description": {
+      "translate": "skill.one_piece_content.sand_hand.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/sand_hand.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:sand_hand"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sand_hand.title"
+    }
+  },
+  "sand_spikes": {
+    "description": {
+      "translate": "skill.one_piece_content.sand_spikes.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/sand_spikes.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:sand_spikes"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sand_spikes.title"
+    }
+  },
+  "sandstorm": {
+    "description": {
+      "translate": "skill.one_piece_content.sandstorm.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/sandstorm.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:sandstorm"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sandstorm.title"
+    }
+  },
+  "sandstorm_modifier_1": {
+    "description": {
+      "translate": "skill.one_piece_content.sandstorm_modifier_1.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/sandstorm_modifier_1.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:sandstorm_modifier_1"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sandstorm_modifier_1.title"
+    }
+  },
+  "sniper_skill_1": {
+    "description": {
+      "translate": "skill.one_piece_content.sniper_skill_1.description"
+    },
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:spyglass"
+      }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.luck",
+          "operation": "multiply_base",
+          "value": 0.25
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sniper_skill_1.title"
+    }
+  },
+  "sniper_skill_2": {
+    "description": {
+      "translate": "skill.one_piece_content.sniper_skill_2.description"
+    },
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:spyglass"
+      }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.movement_speed",
+          "operation": "multiply_base",
+          "value": -0.05
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sniper_skill_2.title"
+    }
+  },
+  "sniper_skill_3": {
+    "description": {
+      "translate": "skill.one_piece_content.sniper_skill_3.description"
+    },
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:crossbow"
+      }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "multiply_base",
+          "value": 0.15
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.sniper_skill_3.title"
+    }
+  },
+  "swordsmen_skill_1": {
+    "description": {
+      "translate": "skill.one_piece_content.swordsmen_skill_1.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/shishi_sonson.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:shishi_sonson"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.swordsmen_skill_1.title"
+    }
+  },
+  "swordsmen_skill_2": {
+    "description": {
+      "translate": "skill.one_piece_content.swordsmen_skill_2.description"
+    },
+    "icon": {
+      "type": "texture",
+      "data": {
+        "texture": "one_piece_content:textures/spell/yakkodori.png"
+      }
+    },
+    "rewards": [
+      {
+        "type": "one_piece_api:spell",
+        "data": {
+          "containers": [
+            {
+              "content": "MAGIC",
+              "is_proxy": true,
+              "max_spell_count": 0,
+              "pool": "",
+              "slot": "",
+              "spell_ids": [
+                "one_piece_content:yakkodori"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.swordsmen_skill_2.title"
+    }
+  },
+  "swordsmen_skill_3": {
+    "description": {
+      "translate": "skill.one_piece_content.swordsmen_skill_3.description"
+    },
+    "icon": {
+      "type": "item",
+      "data": {
+        "item": "minecraft:diamond_sword"
+      }
+    },
+    "rewards": [
+      {
+        "type": "puffish_skills:attribute",
+        "data": {
+          "attribute": "minecraft:generic.attack_damage",
+          "operation": "multiply_base",
+          "value": 0.08
+        }
+      }
+    ],
+    "title": {
+      "translate": "skill.one_piece_content.swordsmen_skill_3.title"
+    }
+  }
+}

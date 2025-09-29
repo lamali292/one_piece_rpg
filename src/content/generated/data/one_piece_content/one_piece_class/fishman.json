@@ -1,0 +1,20 @@
+{
+  "color": {
+    "primary": "#2E86C1",
+    "secondary": "#1B4F72"
+  },
+  "description": {
+    "translate": "Auto-generated description for Fishman class"
+  },
+  "icon": {
+    "type": "item",
+    "data": {
+      "item": "minecraft:tropical_fish"
+    }
+  },
+  "name": {
+    "translate": "Fishman"
+  },
+  "passive": "fishman_passive",
+  "primary": "fishman_primary"
+}

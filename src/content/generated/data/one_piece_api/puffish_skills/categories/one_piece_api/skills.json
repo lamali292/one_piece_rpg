@@ -1,0 +1,104 @@
+{
+  "1903ymfvar4zmn9c": {
+    "definition": "sand_drain",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "19gvxsv49vv22uz2": {
+    "definition": "sniper_skill_2",
+    "root": false,
+    "x": 70.0,
+    "y": 120.0
+  },
+  "1fcy72thg9k2p162": {
+    "definition": "quicksand",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "287emzn7wqjx8w5q": {
+    "definition": "swordsmen_skill_2",
+    "root": false,
+    "x": -138.0,
+    "y": 0.0
+  },
+  "2qm336f6nexvyka0": {
+    "definition": "swordsmen_skill_3",
+    "root": false,
+    "x": -70.0,
+    "y": -120.0
+  },
+  "2ra4b6pd0q512uj0": {
+    "definition": "sandstorm_modifier_1",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "3crvs8nvcbb8w0ka": {
+    "definition": "sandstorm",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "3ln5gwsa5eh81xgt": {
+    "definition": "sniper_skill_3",
+    "root": false,
+    "x": -70.0,
+    "y": 120.0
+  },
+  "3vuxpjb7q61sen9o": {
+    "definition": "sand_spikes",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "41s2m8enzoq7pirb": {
+    "definition": "swordsmen_skill_1",
+    "root": true,
+    "x": -70.0,
+    "y": -40.0
+  },
+  "4iz3ds2cl0ij8fcs": {
+    "definition": "dummy",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "5dzzuvzcb5wdepcp": {
+    "definition": "sand_hand",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "5ma3x3qjceqpml0e": {
+    "definition": "brawler_skill_1",
+    "root": true,
+    "x": 70.0,
+    "y": -40.0
+  },
+  "5p895dicum9q7ffa": {
+    "definition": "sniper_skill_1",
+    "root": true,
+    "x": 0.0,
+    "y": 80.0
+  },
+  "5z3kwqkvhc1q1l0c": {
+    "definition": "brawler_skill_2",
+    "root": false,
+    "x": 130.0,
+    "y": 0.0
+  },
+  "6boygocgxaww4jww": {
+    "definition": "sand_blade",
+    "root": true,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "6cd8wlrlzwxndpzj": {
+    "definition": "brawler_skill_3",
+    "root": false,
+    "x": 70.0,
+    "y": -120.0
+  }
+}

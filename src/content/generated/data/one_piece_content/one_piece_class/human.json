@@ -1,0 +1,20 @@
+{
+  "color": {
+    "primary": "#E74C3C",
+    "secondary": "#A93226"
+  },
+  "description": {
+    "translate": "Auto-generated description for Human class"
+  },
+  "icon": {
+    "type": "item",
+    "data": {
+      "item": "minecraft:iron_sword"
+    }
+  },
+  "name": {
+    "translate": "Human"
+  },
+  "passive": "human_passive",
+  "primary": "human_primary"
+}

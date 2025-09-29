@@ -1,0 +1,35 @@
+{
+  "exclusive": {
+    "bidirectional": [],
+    "unidirectional": []
+  },
+  "normal": {
+    "bidirectional": [],
+    "unidirectional": [
+      [
+        "41s2m8enzoq7pirb",
+        "287emzn7wqjx8w5q"
+      ],
+      [
+        "41s2m8enzoq7pirb",
+        "2qm336f6nexvyka0"
+      ],
+      [
+        "5ma3x3qjceqpml0e",
+        "5z3kwqkvhc1q1l0c"
+      ],
+      [
+        "5ma3x3qjceqpml0e",
+        "6cd8wlrlzwxndpzj"
+      ],
+      [
+        "5p895dicum9q7ffa",
+        "19gvxsv49vv22uz2"
+      ],
+      [
+        "5p895dicum9q7ffa",
+        "3ln5gwsa5eh81xgt"
+      ]
+    ]
+  }
+}
