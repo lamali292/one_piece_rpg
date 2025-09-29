@@ -1,0 +1,38 @@
+{
+  "background": {
+    "height": 463,
+    "position": "fill",
+    "texture": "one_piece_api:textures/gui/background_one_piece.png",
+    "width": 768
+  },
+  "colors": {
+    "connections": {
+      "available": {
+        "fill": "#808080",
+        "stroke": "#8d8d8d"
+      },
+      "excluded": {
+        "fill": "#b31212",
+        "stroke": "#bf2626"
+      },
+      "locked": {
+        "fill": "#3a3a3a",
+        "stroke": "#3d3d3d"
+      },
+      "unlocked": {
+        "fill": "#b37d12",
+        "stroke": "#bf8c26"
+      }
+    }
+  },
+  "exclusive_root": false,
+  "icon": {
+    "type": "texture",
+    "data": {
+      "texture": "one_piece_api:textures/spell/yakkodori.png"
+    }
+  },
+  "starting_points": 3,
+  "title": "Class Skills",
+  "unlocked_by_default": true
+}

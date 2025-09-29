@@ -1,0 +1,25 @@
+{
+  "experience_per_level": {
+    "type": "expression",
+    "data": {
+      "expression": "min((level * 12) ^ 1.6 + 100, 20000)"
+    }
+  },
+  "sources": [
+    {
+      "type": "one_piece_api:time",
+      "data": {
+        "variables": {
+          "ticks": {
+            "operations": [
+              {
+                "type": "one_piece_api:get_ticks"
+              }
+            ]
+          }
+        },
+        "experience": "ticks"
+      }
+    }
+  ]
+}

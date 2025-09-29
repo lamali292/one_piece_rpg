@@ -1,0 +1,157 @@
+package de.one_piece_api.network;
+
+import de.one_piece_api.config.ClassConfig;
+import de.one_piece_api.config.DevilFruitConfig;
+import de.one_piece_api.config.DevilFruitPathConfig;
+import de.one_piece_api.config.SkillDefinitionReferenceConfig;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
+import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.config.IconConfig;
+import net.puffish.skillsmod.config.colors.ColorConfig;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class MyCodecs {
+
+    public static final PacketCodec<PacketByteBuf, ColorConfig> COLOR = PacketCodec.tuple(
+            PacketCodecs.INTEGER,
+            ColorConfig::argb,
+            ColorConfig::new
+    );
+
+    public static final PacketCodec<ByteBuf, StatusEffect> STATUS_EFFECT = PacketCodecs.codec(Registries.STATUS_EFFECT.getCodec());
+    public static final PacketCodec<ByteBuf, Item> ITEM = PacketCodecs.codec(Registries.ITEM.getCodec());
+    public static final PacketCodec<ByteBuf, ItemStack> ITEM_STACK = ITEM.xmap(ItemStack::new, ItemStack::getItem);
+
+
+    public static final PacketCodec<PacketByteBuf, IconConfig.EffectIconConfig> ICON_EFFECT = PacketCodec.tuple(
+            STATUS_EFFECT,
+            IconConfig.EffectIconConfig::effect,
+            IconConfig.EffectIconConfig::new
+    );
+
+    public static final PacketCodec<PacketByteBuf, IconConfig.ItemIconConfig> ICON_ITEM = PacketCodec.tuple(
+            ITEM_STACK,
+            IconConfig.ItemIconConfig::item,
+            IconConfig.ItemIconConfig::new
+    );
+
+    public static final PacketCodec<PacketByteBuf, IconConfig.TextureIconConfig> ICON_TEXTURE = PacketCodec.tuple(
+            Identifier.PACKET_CODEC,
+            IconConfig.TextureIconConfig::texture,
+            IconConfig.TextureIconConfig::new
+    );
+
+    public static final PacketCodec<PacketByteBuf, IconConfig> ICON = PacketCodec.of(
+            (encoder, buf) -> {
+                switch (encoder) {
+                    case IconConfig.EffectIconConfig effect -> {
+                        buf.writeByte(0);
+                        ICON_EFFECT.encode(buf, effect);
+                    }
+                    case IconConfig.ItemIconConfig item -> {
+                        buf.writeByte(1);
+                        ICON_ITEM.encode(buf, item);
+                    }
+                    case IconConfig.TextureIconConfig texture -> {
+                        buf.writeByte(2);
+                        ICON_TEXTURE.encode(buf, texture);
+                    }
+                    default -> throw new IllegalStateException("Unknown IconConfig subclass: " + encoder.getClass());
+                }
+            },
+            buf -> {
+                int type = buf.readByte();
+                return switch (type) {
+                    case 0 -> ICON_EFFECT.decode(buf);
+                    case 1 -> ICON_ITEM.decode(buf);
+                    case 2 -> ICON_TEXTURE.decode(buf);
+                    default -> throw new IllegalStateException("Unknown IconConfig type: " + type);
+                };
+            }
+    );
+
+
+
+    record Intermediate1(ColorConfig primaryColor, ColorConfig secondaryColor, IconConfig icon) {
+        public static Intermediate1 from(ClassConfig config) {
+            return new Intermediate1(config.primaryColor(), config.secondaryColor(), config.icon());
+        }
+    }
+
+    private static final PacketCodec<PacketByteBuf, Intermediate1> INTERMEDIATE1 = PacketCodec.tuple(
+            COLOR,
+            Intermediate1::primaryColor,
+            COLOR,
+            Intermediate1::secondaryColor,
+            ICON,
+            Intermediate1::icon,
+            Intermediate1::new
+    );
+
+    public static final PacketCodec<PacketByteBuf, ClassConfig> CLASS_CONFIG = PacketCodec.tuple(
+                TextCodecs.PACKET_CODEC,
+                ClassConfig::name,
+                TextCodecs.PACKET_CODEC,
+                ClassConfig::description,
+                PacketCodecs.STRING,
+                ClassConfig::primary,
+                PacketCodecs.STRING,
+                ClassConfig::passive,
+                INTERMEDIATE1,
+                Intermediate1::from,
+                (a, b, c, d, e) -> new ClassConfig(Text.of(a), Text.of(b), c, d, e.primaryColor(), e.secondaryColor(), e.icon())
+        );
+
+
+    public static final PacketCodec<PacketByteBuf, Map<Identifier, ClassConfig>> CLASS_CONFIG_MAP = PacketCodecs.map(
+            HashMap::new,
+            Identifier.PACKET_CODEC,
+            CLASS_CONFIG
+    );
+
+
+    public static PacketCodec<PacketByteBuf, SkillDefinitionReferenceConfig> SKILL_DEFINITION_REFERENCE_CONFIG = PacketCodec.tuple(
+            PacketCodecs.STRING,
+            SkillDefinitionReferenceConfig::id,
+            SkillDefinitionReferenceConfig::new
+    );
+
+    public static PacketCodec<PacketByteBuf, ArrayList<SkillDefinitionReferenceConfig>> SKILL_DEFINITION_REFERENCE_CONFIG_LIST = PacketCodecs.collection(
+            ArrayList::new,
+            SKILL_DEFINITION_REFERENCE_CONFIG
+    );
+
+    public static PacketCodec<PacketByteBuf, DevilFruitPathConfig> DEVIL_FRUIT_PATH_CONFIG = PacketCodec.of(
+            (value, buf) -> SKILL_DEFINITION_REFERENCE_CONFIG_LIST.encode(buf, new ArrayList<>(value.skillDefinitions())),
+            buf -> new DevilFruitPathConfig(SKILL_DEFINITION_REFERENCE_CONFIG_LIST.decode(buf))
+    );
+
+    public static PacketCodec<PacketByteBuf, ArrayList<DevilFruitPathConfig>> DEVIL_FRUIT_PATHS_CONFIG = PacketCodecs.collection(
+            ArrayList::new,
+            DEVIL_FRUIT_PATH_CONFIG
+    );
+
+
+    public static PacketCodec<PacketByteBuf, DevilFruitConfig> DEVIL_FRUIT_CONFIG = PacketCodec.tuple(
+            DEVIL_FRUIT_PATHS_CONFIG,
+            e->new ArrayList<>(e.paths()),
+            SKILL_DEFINITION_REFERENCE_CONFIG_LIST,
+            e->new ArrayList<>(e.instantPassives()),
+            Identifier.PACKET_CODEC,
+            DevilFruitConfig::modelId,
+            DevilFruitConfig::new
+    );
+}

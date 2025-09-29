@@ -1,0 +1,18 @@
+{
+  "category.one_piece_api.controls": "One Piece RPG",
+  "class.one_piece_api.fishman.description": "Auto-generated description for Fishman class",
+  "class.one_piece_api.fishman.name": "Fishman",
+  "class.one_piece_api.human.description": "Auto-generated description for Human class",
+  "class.one_piece_api.human.name": "Human",
+  "class.one_piece_api.mink.description": "Auto-generated description for Mink class",
+  "class.one_piece_api.mink.name": "Mink",
+  "gui.one_piece_api.class.passive": "Passive",
+  "gui.one_piece_api.class.primary": "Primary",
+  "gui.one_piece_api.skill.description": "Description:",
+  "gui.one_piece_api.skill.skilltree": "Skill Tree",
+  "item.one_piece_api.devil_fruit": "Devil Fruit",
+  "item.one_piece_api.orb_of_oblivion": "Orb of Oblivion",
+  "item.one_piece_api.orb_of_oblivion.lore.0": "Reset all skill points spend on the Class Skill Tree.",
+  "key.one_piece_api.combat_mode": "Activate Combat Mode",
+  "key.one_piece_api.open_skills": "Open Skill Selection"
+}
