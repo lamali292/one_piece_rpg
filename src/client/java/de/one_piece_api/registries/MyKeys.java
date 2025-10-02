@@ -3,9 +3,8 @@ package de.one_piece_api.registries;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.interfaces.IOnePiecePlayer;
 import de.one_piece_api.network.SetCombatModePayload;
-import de.one_piece_api.screens.ClassScreen;
-import de.one_piece_api.screens.OnePieceScreen;
-import de.one_piece_api.screens.SpellSelectionScreen;
+import de.one_piece_api.gui.OnePieceScreen;
+import de.one_piece_api.gui.managers.ClassScreenManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -19,7 +18,6 @@ import java.util.function.Consumer;
 
 public class MyKeys {
 
-    public static final String OPEN_SKILLS_KEY = "open_skills";
     public static final String OPEN_SKILL_TREE_KEY = "open_skill_tree";
     public static final String TOGGLE_COMBAT_MODE = "combat_mode";
     public static final String OPEN_CLASS = "class";
@@ -30,9 +28,8 @@ public class MyKeys {
 
     public static void register() {
         registerHotkeys(GLFW.GLFW_KEY_G, TOGGLE_COMBAT_MODE, MyKeys::toggleCombatMode);
-        registerHotkeys(GLFW.GLFW_KEY_H, OPEN_SKILLS_KEY, client -> client.setScreen(new SpellSelectionScreen(client.player)));
-        registerHotkeys(GLFW.GLFW_KEY_J, OPEN_SKILL_TREE_KEY, client -> client.setScreen(new OnePieceScreen(client.player)));
-        registerHotkeys(GLFW.GLFW_KEY_B, OPEN_CLASS, client -> client.setScreen(new ClassScreen(client.player)));
+        registerHotkeys(GLFW.GLFW_KEY_H, OPEN_SKILL_TREE_KEY, client -> client.setScreen(new OnePieceScreen(client.player)));
+        registerHotkeys(GLFW.GLFW_KEY_J, OPEN_CLASS, client -> ClassScreenManager.getInstance().openScreen(client.player));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             keyBindings.forEach((id, key) -> {

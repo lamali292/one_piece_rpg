@@ -2,36 +2,36 @@ package de.one_piece_content_data.content;
 
 import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_content.ExampleMod;
-import de.one_piece_content_data.datagen.DevilFruitBuilder;
+import de.one_piece_content_data.registry.Entry;
+import de.one_piece_content_data.builder.DevilFruitBuilder;
+import de.one_piece_content_data.registry.Registries;
 import net.minecraft.util.Identifier;
-
-import java.util.ArrayList;
 
 public class ExampleDevilFruits {
 
 
-    public static final ArrayList<DevilFruit> ENTRIES = new ArrayList<>();
+    public static final Entry<DevilFruitConfig> SUNA_SUNA_NO_MI = Registries.DEVIL_FRUITS.register(
+            ExampleMod.id("suna_suna_no_mi"),
+            addSunaSunaNoMi()
+    );
 
-    private static DevilFruit add(DevilFruit entry) {
-        ENTRIES.add(entry);
-        return entry;
-    }
-    public record DevilFruit(Identifier id, DevilFruitConfig config) { }
-
-    public static final DevilFruit SUNA_SUNA_NO_MI = add(addSunaSunaNoMi());
-    public static DevilFruit addSunaSunaNoMi() {
-        return new DevilFruitBuilder(Identifier.of(ExampleMod.MOD_ID, "suna_suna_no_mi"))
+    public static DevilFruitConfig addSunaSunaNoMi() {
+        return new DevilFruitBuilder()
                 .newPath(builder -> builder
-                        .add("sandstorm", "sandstorm_modifier_1")
+                        .add(ExampleSkillDefinitions.SANDSTORM.id(), ExampleSkillDefinitions.SANDSTORM_MODIFIER_1.id())
                 ).newPath(builder -> builder
-                        .add("sand_hand", "sand_drain")
+                        .add(ExampleSkillDefinitions.DUMMY_DEFINITIONS.get("sand_hand").id(), ExampleSkillDefinitions.DUMMY_DEFINITIONS.get("sand_drain").id())
                 ).newPath(builder -> builder
-                        .add("sand_blade", "sand_spikes")
+                        .add(ExampleSkillDefinitions.DUMMY_DEFINITIONS.get("sand_blade").id(), ExampleSkillDefinitions.DUMMY_DEFINITIONS.get("sand_spikes").id())
                 ).newPath(builder -> builder
-                        .add("quicksand")
-                ).addPassive(ExampleSkills.BRAWLER_SKILL_1.config().id())
+                        .add(ExampleSkillDefinitions.DUMMY_DEFINITIONS.get("quicksand").id())
+                )
                 .modelId(Identifier.of(ExampleMod.MOD_ID, "devil_fruit/suna_suna_no_mi.json"))
                 .build();
+    }
+
+
+    public static void init() {
     }
 
 

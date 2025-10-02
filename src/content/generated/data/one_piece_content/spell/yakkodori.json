@@ -1,23 +1,15 @@
 {
-  "school": "spell_power:physical_melee",
-  "range": 5.0,
-  "tier": 1,
-  "learn": {},
   "active": {
     "cast": {
-      "duration": 0.5,
-      "animation": "spell_engine:one_handed_throw_charge"
+      "animation": "spell_engine:one_handed_throw_charge",
+      "duration": 0.5
     }
   },
-  "release": {
-    "animation": "spell_engine:one_handed_shout_release",
-    "sound": {
-      "id": "minecraft:entity.player.attack.sweep"
-    }
-  },
-  "target": {
-    "type": "AIM",
-    "aim": {}
+  "cost": {
+    "cooldown": {
+      "duration": 8.0
+    },
+    "exhaust": 0.5
   },
   "deliver": {
     "type": "CUSTOM",
@@ -25,10 +17,17 @@
       "handler": "one_piece_content:yakkodori"
     }
   },
-  "cost": {
-    "exhaust": 0.5,
-    "cooldown": {
-      "duration": 8.0
+  "range": 5.0,
+  "release": {
+    "animation": "spell_engine:one_handed_shout_release",
+    "sound": {
+      "id": "minecraft:entity.player.attack.sweep"
     }
-  }
+  },
+  "school": "spell_power:physical_melee",
+  "target": {
+    "type": "AIM",
+    "aim": {}
+  },
+  "tier": 1
 }

@@ -2,7 +2,6 @@ package de.one_piece_api.registries;
 
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.items.DevilFruitItem;
-import de.one_piece_api.items.RespecItem;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
@@ -52,19 +51,6 @@ public class MyItems {
         ENTRIES.add(entry);
         return entry;
     }
-
-    public static final Entry ORB_OF_OBLIVION = add(
-            new Entry(OnePieceRPG.id("orb_of_oblivion"),
-                    "Orb of Oblivion",
-                    List.of(
-                            new LoreLine("Reset all skill points spend on the Class Skill Tree.", Formatting.GRAY)
-                    ),
-                    RespecItem::new,
-                    new Item.Settings()
-                            .rarity(Rarity.UNCOMMON)
-                            .maxDamage(1)
-            )
-    );
 
     public static final Entry DEVIL_FRUIT = add(new Entry(
             OnePieceRPG.id("devil_fruit"),

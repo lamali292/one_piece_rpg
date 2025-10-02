@@ -10,7 +10,6 @@ import net.spell_engine.internals.container.SpellContainerSource;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class SpellUtil {
     public static List<RegistryEntry<Spell>> getPlayerSpells(ClientPlayerEntity player) {

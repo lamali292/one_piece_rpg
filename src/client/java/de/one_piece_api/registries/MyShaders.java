@@ -15,16 +15,24 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class MyShaders {
-    public static ShaderProgram grayscaleShaderProgram;
+    public static ShaderProgram grayscaleShader;
+    public static ShaderProgram gaussianShader;
+
 
     public static void init() {
         register(manager -> {
-            grayscaleShaderProgram = new ShaderProgram(manager, "grayscale", VertexFormats.POSITION_TEXTURE_COLOR);
+            grayscaleShader = new ShaderProgram(manager, "grayscale", VertexFormats.POSITION_TEXTURE_COLOR);
+            gaussianShader = new ShaderProgram(manager, "gaussian", VertexFormats.POSITION_TEXTURE_COLOR);
         });
+
     }
 
-    public static ShaderProgram getGrayscaleShaderProgram() {
-        return grayscaleShaderProgram;
+    public static ShaderProgram getGrayscaleShader() {
+        return grayscaleShader;
+    }
+
+    public static ShaderProgram getGaussianShader() {
+        return gaussianShader;
     }
 
 

@@ -1,0 +1,12 @@
+{
+  "panel_select": {
+    "sounds": [
+      "one_piece_api:panel_select"
+    ]
+  },
+  "ambient": {
+    "sounds": [
+      "one_piece_api:ambient"
+    ]
+  }
+}

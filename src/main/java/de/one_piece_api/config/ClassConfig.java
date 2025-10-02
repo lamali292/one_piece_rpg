@@ -1,20 +1,20 @@
 package de.one_piece_api.config;
 
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.config.IconConfig;
 import net.puffish.skillsmod.config.colors.ColorConfig;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
 public record ClassConfig(Text name, Text description, String primary, String passive, ColorConfig primaryColor, ColorConfig secondaryColor,
-                          IconConfig icon){
+                          Identifier backTexture, Identifier nameTexture){
 
 
     public static Result<ClassConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
@@ -49,33 +49,22 @@ public record ClassConfig(Text name, Text description, String primary, String pa
                 .ifFailure(problems::add)
                 .getSuccess();
 
-        Optional<ColorPairConfig> colors = rootObject.getObject("color")
-                .ifFailure(problems::add)
-                .andThen(colorObject -> {
-                    var subProblems = new ArrayList<Problem>();
-                    Optional<ColorConfig> primaryColor = colorObject.get("primary").getSuccess()
-                            .map(ColorConfig::parse)
-                            .flatMap(e -> e.ifFailure(subProblems::add)
-                                    .getSuccess());
-                    Optional<ColorConfig> secondaryColor = colorObject.get("secondary").getSuccess()
-                            .map(ColorConfig::parse)
-                            .flatMap(e -> e.ifFailure(subProblems::add)
-                                    .getSuccess());
-                    if (subProblems.isEmpty()) {
-                        return Result.success(new ColorPairConfig(
-                                primaryColor.orElseThrow(),
-                                secondaryColor.orElseThrow()
-                        ));
-                    }
-                    return Result.failure(Problem.combine(subProblems));
-                }).ifFailure(problems::add)
-                .getSuccess();
-        Optional<IconConfig> icon = rootObject.get("icon")
-                .getSuccess()
-                .map(json -> IconConfig.parse(json, context))
-                .flatMap(e -> e
-                        .ifFailure(problems::add)
+
+        Optional<ColorConfig> primaryColor = rootObject.get("primaryColor").getSuccess()
+                .map(ColorConfig::parse)
+                .flatMap(e -> e.ifFailure(problems::add)
                         .getSuccess());
+        Optional<ColorConfig> secondaryColor = rootObject.get("secondaryColor").getSuccess()
+                .map(ColorConfig::parse)
+                .flatMap(e -> e.ifFailure(problems::add)
+                        .getSuccess());
+
+        Optional<Identifier> backTexture = rootObject.getString("backTexture")
+                .ifFailure(problems::add)
+                .getSuccess().map(Identifier::of);
+        Optional<Identifier> nameTexture = rootObject.getString("nameTexture")
+                .ifFailure(problems::add)
+                .getSuccess().map(Identifier::of);
 
         // If there were any problems, return failure
         if (problems.isEmpty()) {
@@ -84,9 +73,10 @@ public record ClassConfig(Text name, Text description, String primary, String pa
                     description,
                     primary.orElseThrow(),
                     passive.orElseThrow(),
-                    colors.orElseThrow().primary,
-                    colors.orElseThrow().secondary,
-                    icon.orElseThrow()
+                    primaryColor.orElseThrow(),
+                    secondaryColor.orElseThrow(),
+                    backTexture.orElseThrow(),
+                    nameTexture.orElseThrow()
             ));
         }
 

@@ -1,6 +1,6 @@
 package de.one_piece_api;
 
-import de.one_piece_api.hud.IPostEffectProcessorAccessor;
+import de.one_piece_api.util.IPostEffectProcessorAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.PostEffectProcessor;
 import net.minecraft.client.render.RenderTickCounter;

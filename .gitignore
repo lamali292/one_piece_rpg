@@ -17,7 +17,7 @@ out/
 !**/src/test/**/out/
 
 run/
-server/
+/server/
 
 ### Eclipse ###
 .apt_generated

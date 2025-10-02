@@ -44,8 +44,8 @@ public class DevilFruitItem extends Item {
         if (!fruit.paths().isEmpty()) {
             tooltip.add(Text.literal("Spells: " + fruit.paths().stream().map(s->s.skillDefinitions().getFirst().id()).toList()));
         }
-        if (!fruit.instantPassives().isEmpty()) {
-            tooltip.add(Text.literal("Passives: " + fruit.instantPassives().stream().map(SkillDefinitionReferenceConfig::id).toList()));
+        if (!fruit.passives().isEmpty()) {
+            tooltip.add(Text.literal("Passives: " + fruit.passives().stream().map(SkillDefinitionReferenceConfig::id).toList()));
         }*/
 
     }
