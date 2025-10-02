@@ -9,6 +9,8 @@ public class MyClientPayloads {
         ClientPlayNetworking.registerGlobalReceiver(ClassConfigPayload.TYPE, ClientPacketHandler::handleClassConfig);
         ClientPlayNetworking.registerGlobalReceiver(DevilFruitPayload.TYPE, ClientPacketHandler::handleDevilFruitConfig);
         ClientPlayNetworking.registerGlobalReceiver(UiPayload.TYPE, ClientPacketHandler::handleUi);
+        ClientPlayNetworking.registerGlobalReceiver(SyncStylesPayload.TYPE, ClientPacketHandler::handleSyncStyles);
+
     }
 
 

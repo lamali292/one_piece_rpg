@@ -1,47 +1,29 @@
 {
   "modelId": "one_piece_content:devil_fruit/suna_suna_no_mi.json",
-  "passives": [
+  "passives": [],
+  "paths": [
     {
-      "id": "5ma3x3qjceqpml0e"
-    }
-  ],
-  "spells": {
-    "path0": {
       "skills": [
-        {
-          "id": "3crvs8nvcbb8w0ka"
-        },
-        {
-          "id": "2ra4b6pd0q512uj0"
-        }
+        "one_piece_content:sandstorm",
+        "one_piece_content:sandstorm_modifier_1"
       ]
     },
-    "path1": {
+    {
       "skills": [
-        {
-          "id": "5dzzuvzcb5wdepcp"
-        },
-        {
-          "id": "1903ymfvar4zmn9c"
-        }
+        "one_piece_content:sand_hand",
+        "one_piece_content:sand_drain"
       ]
     },
-    "path2": {
+    {
       "skills": [
-        {
-          "id": "6boygocgxaww4jww"
-        },
-        {
-          "id": "3vuxpjb7q61sen9o"
-        }
+        "one_piece_content:sand_blade",
+        "one_piece_content:sand_spikes"
       ]
     },
-    "path3": {
+    {
       "skills": [
-        {
-          "id": "1fcy72thg9k2p162"
-        }
+        "one_piece_content:quicksand"
       ]
     }
-  }
+  ]
 }

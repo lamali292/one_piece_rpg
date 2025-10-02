@@ -1,16 +1,18 @@
 {
-	"required": true,
-	"package": "de.one_piece_api.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"refmap": "one_piece_api.refmap.json",
-	"mixins": [
-		"SpellContainerSourceMixin",
-		"PlayerEntityMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
+  "required": true,
+  "package": "de.one_piece_api.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "one_piece_api.refmap.json",
+  "mixins": [
+    "PlayerEntityMixin",
+    "SkillConfigMixin",
+    "SkillConnectionMixin",
+    "SpellContainerSourceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
 	}
 }

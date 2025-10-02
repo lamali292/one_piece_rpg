@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public record DevilFruitConfig(
         List<DevilFruitPathConfig> paths,
-        List<SkillDefinitionReferenceConfig> instantPassives,
+        List<Identifier> passives,
         Identifier modelId
 ) {
 
@@ -29,20 +29,17 @@ public record DevilFruitConfig(
 
 
         // Parse spells
-        Result<List<DevilFruitPathConfig>, Problem> spellsResult = obj.getObject("spells").getSuccess()
-                .map(pathObject -> pathObject.getAsMap((key, element) ->
-                                DevilFruitPathConfig.parse(element))
-                        .mapFailure(problem -> Problem.combine(problem.values()))
-                        .mapSuccess(map -> map.values().stream().toList())
-                )
-                .orElse(Result.failure(new ProblemImpl("Missing 'path' object in DevilFruitPathsConfig")));
-        Optional<List<DevilFruitPathConfig>> optSpells = spellsResult
-                .ifFailure(problems::add)
-                .getSuccess();
+        Optional<List<DevilFruitPathConfig>> optSpells = obj.getArray("paths").getSuccess()
+                .map(jsonArray -> jsonArray.stream().map(e->
+                        DevilFruitPathConfig.parse(e)
+                                .ifFailure(problems::add)
+                                .getSuccess()
+                ).filter(Optional::isPresent).map(Optional::get).toList());
+
 
         // Parse passives
-        List<SkillDefinitionReferenceConfig> passives = obj.getArray("passives")
-                .andThen(array -> array.getAsList((index, el) -> SkillDefinitionReferenceConfig.parse(el))
+        List<Identifier> passives = obj.getArray("passives")
+                .andThen(array -> array.getAsList((index, el) -> el.getAsString().mapSuccess(Identifier::of))
                         .mapFailure(Problem::combine)
                 ).getSuccess().orElse(List.of());
         // Parse modelId

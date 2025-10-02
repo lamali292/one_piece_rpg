@@ -75,6 +75,7 @@ tasks.register<Jar>("contentJar") {
     from(sourceSets["content"].output.classesDirs)
     from(fileTree("src/content/resources")) {
         include("fabric.mod.json")
+        include("fabric.mod.json")
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

@@ -1,20 +1,10 @@
 {
-  "color": {
-    "primary": "#F39C12",
-    "secondary": "#D68910"
-  },
-  "description": {
-    "translate": "Auto-generated description for Mink class"
-  },
-  "icon": {
-    "type": "item",
-    "data": {
-      "item": "minecraft:rabbit_foot"
-    }
-  },
-  "name": {
-    "translate": "Mink"
-  },
+  "backTexture": "one_piece_content:textures/classes/mink.png",
+  "description": "Auto-generated description for Mink class",
+  "name": "Mink",
+  "nameTexture": "one_piece_content:textures/classes/mink_name.png",
   "passive": "mink_passive",
-  "primary": "mink_primary"
+  "primary": "mink_primary",
+  "primaryColor": "#F39C12",
+  "secondaryColor": "#D68910"
 }

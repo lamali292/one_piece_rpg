@@ -12,7 +12,7 @@ public class OnePieceRPGDatagen implements DataGeneratorEntrypoint {
 		pack.addProvider(LangGen::new);
 		pack.addProvider(ModelGen::new);
 		pack.addProvider(RecipeGen::new);
-		pack.addProvider(SkillCategoryGen::new);
+		//pack.addProvider(SkillCategoryGen::new);
 	}
 
 }

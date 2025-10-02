@@ -141,18 +141,22 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
     // Common mods
-    modApi("maven.modrinth:spell-engine:1.7.3+1.21.1")
-    modApi("maven.modrinth:cloth-config:15.0.140+fabric")
-    modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.0")
-    modApi("org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.0")
-    modApi("com.github.ZsoltMolnarrr:TinyConfig:2.3.2")
-    modApi("maven.modrinth:spell-power:1.3.1+1.21.1")
-    modApi("maven.modrinth:trinkets:3.10.0")
-    modApi("maven.modrinth:playeranimator:2.0.0+1.21.1-fabric")
-    modApi("curse.maven:amecs-reborn-1233121:6487881")
+    // Pufferfish's Skills
     modApi("curse.maven:puffish-skills-835091:6999511")
 
-    //modImplementation("curse.maven:modmenu-308702:5810603")
+    // Spell Engine and transitive dependencies that don't get handled somehow
+    modApi("maven.modrinth:spell-engine:1.7.3+1.21.1")
+    modApi("maven.modrinth:spell-power:1.3.1+1.21.1")
+    modRuntimeOnly("maven.modrinth:cloth-config:15.0.140+fabric")
+    modRuntimeOnly("org.ladysnake.cardinal-components-api:cardinal-components-base:6.1.0")
+    modRuntimeOnly("org.ladysnake.cardinal-components-api:cardinal-components-entity:6.1.0")
+    modRuntimeOnly("com.github.ZsoltMolnarrr:TinyConfig:2.3.2")
+    modRuntimeOnly("maven.modrinth:trinkets:3.10.0")
+    modRuntimeOnly("maven.modrinth:playeranimator:2.0.0+1.21.1-fabric")
+
+    // helpful mods for testing
+    modRuntimeOnly("curse.maven:amecs-reborn-1233121:6487881")
+    modRuntimeOnly("curse.maven:modmenu-308702:5810603")
 }
 
 

@@ -2,7 +2,7 @@ package de.one_piece_api.mixin;
 
 
 import com.mojang.blaze3d.platform.GlConst;
-import de.one_piece_api.hud.IPostEffectProcessorAccessor;
+import de.one_piece_api.util.IPostEffectProcessorAccessor;
 import net.minecraft.client.gl.PostEffectPass;
 import net.minecraft.client.gl.PostEffectProcessor;
 import org.spongepowered.asm.mixin.Final;

@@ -25,22 +25,14 @@ public class LangGen extends FabricLanguageProvider {
         }
         builder.add("gui."+ OnePieceRPG.MOD_ID+".class.primary", "Primary");
         builder.add("gui."+ OnePieceRPG.MOD_ID+".class.passive", "Passive");
-        builder.add("gui."+ OnePieceRPG.MOD_ID+".skill.skilltree", "Skill Tree");
-        builder.add("gui."+ OnePieceRPG.MOD_ID+".skill.description", "Description:");
+        builder.add("gui."+ OnePieceRPG.MOD_ID+".skill.skilltree", "Arbre de compétence");
+        builder.add("gui."+ OnePieceRPG.MOD_ID+".skill.description", "Déscription :");
+        builder.add("gui."+ OnePieceRPG.MOD_ID+".tab.devilfruit", "Fruit du démon");
+        builder.add("gui."+ OnePieceRPG.MOD_ID+".tab.class", "Classes");
+        builder.add("gui."+ OnePieceRPG.MOD_ID+".tab.haki", "Haki");
+
         builder.add("key."+ OnePieceRPG.MOD_ID+"."+ MyKeys.TOGGLE_COMBAT_MODE, "Activate Combat Mode");
-        builder.add("key."+ OnePieceRPG.MOD_ID+"."+ MyKeys.OPEN_SKILLS_KEY, "Open Skill Selection");
         builder.add("category."+ OnePieceRPG.MOD_ID+".controls", "One Piece RPG");
-
-        String[] classes = {"fishman", "human", "mink"};
-
-        for (String className : classes) {
-            String displayName = StringUtil.capitalize(className);
-            String description = "Auto-generated description for " + displayName + " class";
-
-            builder.add("class."+ OnePieceRPG.MOD_ID+"." + className + ".name", displayName);
-            builder.add("class."+ OnePieceRPG.MOD_ID+"." + className + ".description", description);
-        }
-
 
     }
 }

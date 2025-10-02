@@ -1,38 +1,16 @@
 {
-  "school": "spell_power:physical_melee",
-  "range": 0.0,
-  "range_mechanic": "MELEE",
-  "tier": 1,
-  "learn": {},
   "active": {
     "cast": {
-      "duration": 0.25,
+      "animation": "spell_engine:one_handed_throw_charge",
       "channel_ticks": 1,
-      "animation": "spell_engine:one_handed_throw_charge"
+      "duration": 0.25
     }
   },
-  "release": {
-    "animation": "spell_engine:dual_handed_weapon_cross",
-    "particles": [
-      {
-        "particle_id": "spell_engine:smoke_medium",
-        "origin": "FEET",
-        "shape": "CIRCLE",
-        "count": 25.0,
-        "min_speed": 0.15,
-        "max_speed": 0.15,
-        "pre_spawn_travel": 1.0
-      }
-    ],
-    "sound": {
-      "id": "minecraft:entity.player.attack.sweep"
-    }
-  },
-  "target": {
-    "type": "AREA",
-    "area": {
-      "vertical_range_multiplier": 0.5
-    }
+  "cost": {
+    "cooldown": {
+      "duration": 8.0
+    },
+    "exhaust": 0.5
   },
   "deliver": {
     "type": "CUSTOM",
@@ -45,27 +23,48 @@
       "action": {
         "type": "DAMAGE",
         "damage": {
-          "spell_power_coefficient": 0.0,
-          "knockback": 0.0
+          "knockback": 0.0,
+          "spell_power_coefficient": 0.0
         }
       },
       "particles": [
         {
-          "particle_id": "spell_engine:smoke_medium",
-          "origin": "FEET",
-          "shape": "CIRCLE",
           "count": 25.0,
-          "min_speed": 0.15,
           "max_speed": 0.15,
-          "pre_spawn_travel": 1.0
+          "min_speed": 0.15,
+          "origin": "FEET",
+          "particle_id": "spell_engine:smoke_medium",
+          "pre_spawn_travel": 1.0,
+          "shape": "CIRCLE"
         }
       ]
     }
   ],
-  "cost": {
-    "exhaust": 0.5,
-    "cooldown": {
-      "duration": 8.0
+  "range": 0.0,
+  "range_mechanic": "MELEE",
+  "release": {
+    "animation": "spell_engine:dual_handed_weapon_cross",
+    "particles": [
+      {
+        "count": 25.0,
+        "max_speed": 0.15,
+        "min_speed": 0.15,
+        "origin": "FEET",
+        "particle_id": "spell_engine:smoke_medium",
+        "pre_spawn_travel": 1.0,
+        "shape": "CIRCLE"
+      }
+    ],
+    "sound": {
+      "id": "minecraft:entity.player.attack.sweep"
     }
-  }
+  },
+  "school": "spell_power:physical_melee",
+  "target": {
+    "type": "AREA",
+    "area": {
+      "vertical_range_multiplier": 0.5
+    }
+  },
+  "tier": 1
 }

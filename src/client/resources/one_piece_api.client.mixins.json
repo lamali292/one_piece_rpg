@@ -9,7 +9,10 @@
     "KeyBoardMixin",
     "PostEffectProcessorMixin",
     "SkillsClientModMixin",
-    "SpellHotbarMixin"
+    "SpellHotbarMixin",
+    "ShowCategoryInPacketMixin",
+    "ClientSkillConnectionConfigMixin",
+    "ClientSkillConfigMixin"
   ],
   "injectors": {
     "defaultRequire": 1

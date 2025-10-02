@@ -1,5 +1,6 @@
 package de.one_piece_api.mixin;
 
+import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.interfaces.IOnePiecePlayer;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -19,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Mixin(PlayerEntity.class)
 public class PlayerEntityMixin implements IOnePiecePlayer {
@@ -76,7 +76,8 @@ public class PlayerEntityMixin implements IOnePiecePlayer {
     public List<String> onepiece$getSelectedSpellIds() {
         NbtCompound data = onepiece$getSelf().getDataTracker().get(SPELL_HOTBAR);
         List<String> spells = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
+        int slots = OnePieceRPG.getSpellSlots(onepiece$getSelf());
+        for (int i = 0; i < slots; i++) {
             spells.add(data.getString("" + i));
         }
         return spells;

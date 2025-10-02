@@ -1,20 +1,10 @@
 {
-  "color": {
-    "primary": "#E74C3C",
-    "secondary": "#A93226"
-  },
-  "description": {
-    "translate": "Auto-generated description for Human class"
-  },
-  "icon": {
-    "type": "item",
-    "data": {
-      "item": "minecraft:iron_sword"
-    }
-  },
-  "name": {
-    "translate": "Human"
-  },
+  "backTexture": "one_piece_content:textures/classes/human.png",
+  "description": "Auto-generated description for Human class",
+  "name": "Human",
+  "nameTexture": "one_piece_content:textures/classes/human_name.png",
   "passive": "human_passive",
-  "primary": "human_primary"
+  "primary": "human_primary",
+  "primaryColor": "#E74C3C",
+  "secondaryColor": "#A93226"
 }

@@ -2,6 +2,7 @@ package de.one_piece_api.datagen.generator;
 
 import com.google.gson.*;
 import de.one_piece_api.OnePieceRPG;
+import de.one_piece_api.content.CategoryLoader;
 import de.one_piece_api.datagen.JsonHandler;
 import de.one_piece_api.util.OnePieceCategory;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -43,37 +44,7 @@ public class SkillCategoryGen implements DataProvider {
     }
 
     private JsonObject createClassSkillsCategory() {
-        var locked = new FillStrokeColorsConfig(
-                new ColorConfig(0xFF3A3A3A), new ColorConfig(0xFF3D3D3D)
-        );
-        var available = new FillStrokeColorsConfig(
-                new ColorConfig(0xFF808080), new ColorConfig(0xFF8D8D8D)
-        );
-        var unlocked = new FillStrokeColorsConfig(
-                new ColorConfig(0xFFb37d12), new ColorConfig(0xFFbf8c26)
-        );
-        var excluded = new FillStrokeColorsConfig(
-                new ColorConfig(0xFFb31212), new ColorConfig(0xFFbf2626)
-        );
-        GeneralConfig config = new GeneralConfig(
-                Text.literal("Class Skills"),
-                new IconConfig.TextureIconConfig(OnePieceRPG.id("textures/spell/yakkodori")),
-                new BackgroundConfig(OnePieceRPG.id("textures/gui/background_one_piece"),
-                        768,
-                        463,
-                        BackgroundPosition.FILL),
-                new ColorsConfig(new ConnectionsColorsConfig(locked,
-                        available,
-                        null,
-                        unlocked,
-                        excluded), null),
-                true,
-                3,
-                false,
-                -1
-        );
-
-        return JsonHandler.toJson(config);
+        return JsonHandler.toJson(CategoryLoader.buildGeneralConfig());
     }
 
     private void addConnectionColor(JsonObject connections, String state, String fill, String stroke) {

@@ -1,9 +1,6 @@
 package de.one_piece_api.network;
 
-import de.one_piece_api.config.ClassConfig;
-import de.one_piece_api.config.DevilFruitConfig;
-import de.one_piece_api.config.DevilFruitPathConfig;
-import de.one_piece_api.config.SkillDefinitionReferenceConfig;
+import de.one_piece_api.config.*;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
@@ -25,10 +22,19 @@ import java.util.Map;
 
 public class MyCodecs {
 
+
+
+
     public static final PacketCodec<PacketByteBuf, ColorConfig> COLOR = PacketCodec.tuple(
             PacketCodecs.INTEGER,
             ColorConfig::argb,
             ColorConfig::new
+    );
+
+    public static final PacketCodec<PacketByteBuf, StyleConfig> STYLE = PacketCodec.tuple(
+            COLOR,
+            StyleConfig::color,
+            StyleConfig::new
     );
 
     public static final PacketCodec<ByteBuf, StatusEffect> STATUS_EFFECT = PacketCodecs.codec(Registries.STATUS_EFFECT.getCodec());
@@ -85,9 +91,9 @@ public class MyCodecs {
 
 
 
-    record Intermediate1(ColorConfig primaryColor, ColorConfig secondaryColor, IconConfig icon) {
+    record Intermediate1(ColorConfig primaryColor, ColorConfig secondaryColor, Identifier backTexture, Identifier nameTexture) {
         public static Intermediate1 from(ClassConfig config) {
-            return new Intermediate1(config.primaryColor(), config.secondaryColor(), config.icon());
+            return new Intermediate1(config.primaryColor(), config.secondaryColor(), config.backTexture(), config.nameTexture());
         }
     }
 
@@ -96,8 +102,10 @@ public class MyCodecs {
             Intermediate1::primaryColor,
             COLOR,
             Intermediate1::secondaryColor,
-            ICON,
-            Intermediate1::icon,
+            Identifier.PACKET_CODEC,
+            Intermediate1::backTexture,
+            Identifier.PACKET_CODEC,
+            Intermediate1::nameTexture,
             Intermediate1::new
     );
 
@@ -112,7 +120,7 @@ public class MyCodecs {
                 ClassConfig::passive,
                 INTERMEDIATE1,
                 Intermediate1::from,
-                (a, b, c, d, e) -> new ClassConfig(Text.of(a), Text.of(b), c, d, e.primaryColor(), e.secondaryColor(), e.icon())
+                (a, b, c, d, e) -> new ClassConfig(Text.of(a), Text.of(b), c, d, e.primaryColor(), e.secondaryColor(), e.backTexture(), e.nameTexture())
         );
 
 
@@ -123,20 +131,16 @@ public class MyCodecs {
     );
 
 
-    public static PacketCodec<PacketByteBuf, SkillDefinitionReferenceConfig> SKILL_DEFINITION_REFERENCE_CONFIG = PacketCodec.tuple(
-            PacketCodecs.STRING,
-            SkillDefinitionReferenceConfig::id,
-            SkillDefinitionReferenceConfig::new
-    );
 
-    public static PacketCodec<PacketByteBuf, ArrayList<SkillDefinitionReferenceConfig>> SKILL_DEFINITION_REFERENCE_CONFIG_LIST = PacketCodecs.collection(
+
+    public static PacketCodec<PacketByteBuf, ArrayList<Identifier>> IDENTIFIER_LIST = PacketCodecs.collection(
             ArrayList::new,
-            SKILL_DEFINITION_REFERENCE_CONFIG
+            Identifier.PACKET_CODEC
     );
 
     public static PacketCodec<PacketByteBuf, DevilFruitPathConfig> DEVIL_FRUIT_PATH_CONFIG = PacketCodec.of(
-            (value, buf) -> SKILL_DEFINITION_REFERENCE_CONFIG_LIST.encode(buf, new ArrayList<>(value.skillDefinitions())),
-            buf -> new DevilFruitPathConfig(SKILL_DEFINITION_REFERENCE_CONFIG_LIST.decode(buf))
+            (value, buf) -> IDENTIFIER_LIST.encode(buf, new ArrayList<>(value.skills())),
+            buf -> new DevilFruitPathConfig(IDENTIFIER_LIST.decode(buf))
     );
 
     public static PacketCodec<PacketByteBuf, ArrayList<DevilFruitPathConfig>> DEVIL_FRUIT_PATHS_CONFIG = PacketCodecs.collection(
@@ -148,8 +152,8 @@ public class MyCodecs {
     public static PacketCodec<PacketByteBuf, DevilFruitConfig> DEVIL_FRUIT_CONFIG = PacketCodec.tuple(
             DEVIL_FRUIT_PATHS_CONFIG,
             e->new ArrayList<>(e.paths()),
-            SKILL_DEFINITION_REFERENCE_CONFIG_LIST,
-            e->new ArrayList<>(e.instantPassives()),
+            IDENTIFIER_LIST,
+            e->new ArrayList<>(e.passives()),
             Identifier.PACKET_CODEC,
             DevilFruitConfig::modelId,
             DevilFruitConfig::new
