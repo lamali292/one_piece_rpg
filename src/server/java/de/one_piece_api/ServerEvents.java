@@ -1,9 +1,13 @@
 package de.one_piece_api;
 
+import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_api.content.CategoryLoader;
 import de.one_piece_api.content.DataLoader;
+import de.one_piece_api.events.EventRegistry;
 import de.one_piece_api.experience.ItemExperienceSource;
 import de.one_piece_api.experience.TimeExperienceSource;
+import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.network.DevilFruitPayload;
 import de.one_piece_api.network.SyncStylesPayload;
 import de.one_piece_api.registries.MyCommands;
 import de.one_piece_api.registries.MyDataComponentTypes;
@@ -20,6 +24,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.SkillsAPI;
 import net.puffish.skillsmod.config.CategoryConfig;
 
@@ -40,6 +45,19 @@ public class ServerEvents {
 
         ServerLifecycleEvents.SERVER_STARTING.register(ServerEvents::onServerStarted);
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(ServerEvents::onEndDataPackReload);
+
+        EventRegistry.registerDevilFruitEatenEvent(ServerEvents::onDevilFruitEaten);
+    }
+
+    private static void onDevilFruitEaten(ServerPlayerEntity serverPlayerEntity, Identifier identifier) {
+        if (serverPlayerEntity instanceof IOnePiecePlayer player) {
+            player.onepiece$setDevilFruit(identifier.toString());
+        }
+        var config = DataLoader.DEVIL_FRUIT_LOADER.getItems().get(identifier);
+        if (config == null) {
+            config = DevilFruitConfig.DEFAULT;
+        }
+        ServerPlayNetworking.send(serverPlayerEntity, new DevilFruitPayload(identifier, config));
     }
 
     private static void onServerStarted(MinecraftServer minecraftServer) {

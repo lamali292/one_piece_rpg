@@ -227,7 +227,7 @@ public class OnePieceScreen extends GenericTabbedScreen {
     public void setTabs(DevilFruitConfig devilFruitConfig) {
         int tabWidth = Layout.RECT_DIM * 4;
         tabs.clear();
-        if (devilFruitConfig != null) {
+        if (devilFruitConfig != null && !devilFruitConfig.paths().isEmpty()) {
             addTab(getTranslatable("devilfruit"), new DevilFruitTab(this, devilFruitConfig), tabWidth);
         }
         addTab(getTranslatable("class"), new SkillsTab(this), tabWidth);

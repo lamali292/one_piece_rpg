@@ -19,6 +19,9 @@ public record DevilFruitConfig(
         Identifier modelId
 ) {
 
+    public static final DevilFruitConfig DEFAULT = new DevilFruitConfig(List.of(), List.of(), Identifier.of(""));
+
+
     public static Result<DevilFruitConfig, Problem> parse(JsonElement rootElement, LoaderContext context) {
         return rootElement.getAsObject().andThen(rootObject -> parse(rootObject, context));
     }

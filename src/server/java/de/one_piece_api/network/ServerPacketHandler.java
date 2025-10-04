@@ -8,14 +8,11 @@ import de.one_piece_api.util.SkillHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.SkillsMod;
 import net.spell_engine.api.spell.fx.ParticleBatch;
 import net.spell_engine.client.util.Color;
 import net.spell_engine.fx.ParticleHelper;
 import net.spell_engine.fx.SpellEngineParticles;
 import net.spell_engine.internals.container.SpellContainerSource;
-
-import java.util.List;
 
 public class ServerPacketHandler {
 
@@ -63,7 +60,7 @@ public class ServerPacketHandler {
             Identifier id = request.identifier();
             DevilFruitConfig config = DataLoader.DEVIL_FRUIT_LOADER.getItems().get(id);
             if (config == null) {
-                config = new DevilFruitConfig(List.of(), List.of(), Identifier.of(""));
+                config = DevilFruitConfig.DEFAULT;
             }
             context.responseSender().sendPacket(new DevilFruitPayload(id, config));
         });
