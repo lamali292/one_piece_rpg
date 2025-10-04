@@ -6,7 +6,8 @@ import de.one_piece_api.content.DataLoader;
 import de.one_piece_api.events.EventRegistry;
 import de.one_piece_api.experience.ItemExperienceSource;
 import de.one_piece_api.experience.TimeExperienceSource;
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.IDevilFruitPlayer;
+import de.one_piece_api.interfaces.IStaminaPlayer;
 import de.one_piece_api.network.DevilFruitPayload;
 import de.one_piece_api.network.SyncStylesPayload;
 import de.one_piece_api.registries.MyCommands;
@@ -50,7 +51,7 @@ public class ServerEvents {
     }
 
     private static void onDevilFruitEaten(ServerPlayerEntity serverPlayerEntity, Identifier identifier) {
-        if (serverPlayerEntity instanceof IOnePiecePlayer player) {
+        if (serverPlayerEntity instanceof IDevilFruitPlayer player) {
             player.onepiece$setDevilFruit(identifier.toString());
         }
         var config = DataLoader.DEVIL_FRUIT_LOADER.getItems().get(identifier);
@@ -96,11 +97,15 @@ public class ServerEvents {
     }
 
     private static final Map<UUID, Integer> playerTickCounters = new HashMap<>();
+
     private static final int TICKS_PER_HOUR= 20 * 60 * 60; // 20 ticks/sec * 60 sec * 10 min = 12000 ticks
     private static void onServerPlayerTick(ServerPlayerEntity player) {
        UUID playerId = player.getUuid();
         int currentTicks = playerTickCounters.getOrDefault(playerId, 0) + 1;
 
+        if (player instanceof IStaminaPlayer staminaPlayer) {
+            staminaPlayer.onepiece$updateStamina();
+        }
         if (currentTicks >= TICKS_PER_HOUR) {
             // Give XP every hour
             player.sendMessage(Text.of("You received 50 XP because you were 1h on server"), false);

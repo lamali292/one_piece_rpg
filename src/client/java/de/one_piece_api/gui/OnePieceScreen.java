@@ -5,7 +5,7 @@ import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.PostProcessingManager;
 import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_api.gui.util.Tab;
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.IDevilFruitPlayer;
 import de.one_piece_api.network.DevilFruitPayload;
 import de.one_piece_api.network.UiPayload;
 import de.one_piece_api.registries.MyFonts;
@@ -18,7 +18,7 @@ import de.one_piece_api.gui.tabs.SkillsTab;
 import de.one_piece_api.gui.util.CustomButton;
 import de.one_piece_api.gui.util.GenericTabbedScreen;
 import de.one_piece_api.gui.widgets.*;
-import de.one_piece_api.util.ListenerUtil;
+import de.one_piece_api.util.ClientData;
 import de.one_piece_api.util.OnePieceCategory;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
@@ -36,7 +36,6 @@ import net.puffish.skillsmod.client.data.ClientSkillScreenData;
 import net.spell_engine.api.spell.Spell;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -137,7 +136,7 @@ public class OnePieceScreen extends GenericTabbedScreen {
 
     public OnePieceScreen(ClientPlayerEntity player) {
         super(Text.literal("Skill Tree"), player);
-        ListenerUtil.DEVIL_FRUIT_CONFIG.addListener(this::onDevilFruitUpdate);
+        ClientData.DEVIL_FRUIT_CONFIG.addListener(this::onDevilFruitUpdate);
         this.skillScreenData = loadSkillScreenData();
         this.categoryData = loadCategoryData();
 
@@ -259,7 +258,7 @@ public class OnePieceScreen extends GenericTabbedScreen {
             categoryData.updateUnseenPoints();
         }
 
-        if (player instanceof IOnePiecePlayer onePiecePlayer) {
+        if (player instanceof IDevilFruitPlayer onePiecePlayer) {
             String fruitString = onePiecePlayer.onepiece$getDevilFruit();
             Identifier playerFruitId = Identifier.of(fruitString);
             if (!playerFruitId.equals(fruitId)) {
@@ -329,7 +328,7 @@ public class OnePieceScreen extends GenericTabbedScreen {
 
         // Setup tabs if not already done
         if (tabs.isEmpty()) {
-            var config = ListenerUtil.DEVIL_FRUIT_CONFIG.get().orElse(null);
+            var config = ClientData.DEVIL_FRUIT_CONFIG.get().orElse(null);
             setTabs(config);
         }
 

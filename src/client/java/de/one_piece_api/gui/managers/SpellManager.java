@@ -1,6 +1,6 @@
 package de.one_piece_api.gui.managers;
 
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.ISpellPlayer;
 import de.one_piece_api.network.SetSpellsPayload;
 import de.one_piece_api.util.SpellUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -43,7 +43,7 @@ public class SpellManager {
      * Handles slot swapping if the spell already exists elsewhere.
      */
     public void updateSpellSlot(int slotIndex, RegistryEntry<Spell> newSpell) {
-        if (!(player instanceof IOnePiecePlayer onePiecePlayer)) {
+        if (!(player instanceof ISpellPlayer onePiecePlayer)) {
             return;
         }
 
@@ -79,7 +79,7 @@ public class SpellManager {
      * Removes a spell from a specific slot.
      */
     public void removeSpellFromSlot(int slotIndex) {
-        if (!(player instanceof IOnePiecePlayer onePiecePlayer)) {
+        if (!(player instanceof ISpellPlayer onePiecePlayer)) {
             return;
         }
 
@@ -113,7 +113,7 @@ public class SpellManager {
     /**
      * Syncs spell changes with the server.
      */
-    private void syncSpells(IOnePiecePlayer onePiecePlayer, List<RegistryEntry<Spell>> spells) {
+    private void syncSpells(ISpellPlayer onePiecePlayer, List<RegistryEntry<Spell>> spells) {
         List<String> spellIds = spells.stream()
                 .map(spell -> spell != null ? spell.getIdAsString() : "")
                 .toList();

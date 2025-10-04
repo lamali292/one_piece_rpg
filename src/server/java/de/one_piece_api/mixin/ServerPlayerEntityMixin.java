@@ -1,6 +1,7 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.IClassPlayer;
+import de.one_piece_api.interfaces.ISpellPlayer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -18,10 +19,14 @@ public class ServerPlayerEntityMixin {
 
     @Inject(method = "copyFrom", at = @At("TAIL"))
     public void onCopyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
-        IOnePiecePlayer thisPlayer = (IOnePiecePlayer) this.getSelf();
-        IOnePiecePlayer thatPlayer = (IOnePiecePlayer) oldPlayer;
-        thisPlayer.onepiece$setOnePieceClass(thatPlayer.onepiece$getOnePieceClass());
-        thisPlayer.onepiece$setSelectedSpellIds(thatPlayer.onepiece$getSelectedSpellIds());
+        IClassPlayer thisClassPlayer = (IClassPlayer) this.getSelf();
+        IClassPlayer thatClassPlayer = (IClassPlayer) oldPlayer;
+
+        ISpellPlayer thisSpellPlayer = (ISpellPlayer) this.getSelf();
+        ISpellPlayer thatSpellPlayer = (ISpellPlayer) oldPlayer;
+
+        thisClassPlayer.onepiece$setOnePieceClass(thatClassPlayer.onepiece$getOnePieceClass());
+        thisSpellPlayer.onepiece$setSelectedSpellIds(thatSpellPlayer.onepiece$getSelectedSpellIds());
     }
 
 

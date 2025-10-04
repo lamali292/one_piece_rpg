@@ -7,7 +7,7 @@ import de.one_piece_api.gui.widgets.ClassWidget;
 import de.one_piece_api.network.ClassConfigPayload;
 import de.one_piece_api.network.SetClassPayload;
 import de.one_piece_api.registries.MySounds;
-import de.one_piece_api.util.ListenerUtil;
+import de.one_piece_api.util.ClientData;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -63,7 +63,7 @@ public class ClassScreen extends Screen {
 
     public ClassScreen() {
         super(ScreenTexts.EMPTY);
-        ListenerUtil.CLASS_CONFIG.addListener(this::onClassConfigChange);
+        ClientData.CLASS_CONFIG.addListener(this::onClassConfigChange);
     }
 
     /**

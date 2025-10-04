@@ -1,7 +1,9 @@
 package de.one_piece_api.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.ICombatPlayer;
+import de.one_piece_api.interfaces.IStaminaCost;
+import de.one_piece_api.interfaces.IStaminaPlayer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -27,7 +29,7 @@ public class CustomSpellHotBarWidget {
 
         MinecraftClient client = MinecraftClient.getInstance();
 
-        boolean combat = client.player instanceof IOnePiecePlayer iCombatPlayer && iCombatPlayer.onepiece$isCombatMode();
+        boolean combat = client.player instanceof ICombatPlayer iCombatPlayer && iCombatPlayer.onepiece$isCombatMode();
 
 // Smoothly interpolate alpha
         if (combat) {
@@ -82,7 +84,7 @@ public class CustomSpellHotBarWidget {
                 break;
             }
             var spell = viewModel.spells().get(id);
-            int x = (int) (origin.x + iconsOffset.x) + ((slotWidth) * i);
+            int x = (int) (origin.x + iconsOffset.x) + slotWidth * i;
             int y = (int) (origin.y + iconsOffset.y);
             RenderSystem.enableBlend();
             if (spell.iconId() != null) {
@@ -93,6 +95,11 @@ public class CustomSpellHotBarWidget {
             // Cooldown
             if (spell.cooldown() > 0) {
                 renderCooldown(context, spell.cooldown(), x, y);
+            }
+            IStaminaCost staminaCost = (IStaminaCost) (Object) spell;
+            if (staminaCost != null) {
+                float stamina = staminaCost.onepiece$getStaminaCost();
+                renderStamina(context, stamina, x, y);
             }
 
             // Keybinding
@@ -116,6 +123,7 @@ public class CustomSpellHotBarWidget {
             }
         }
     }
+
 
     private static void drawBackground(DrawContext context, float barOpacity, Vec2f origin, int count) {
         context.setShaderColor(1.0f, 1.0f, 1.0f, barOpacity);
@@ -147,11 +155,62 @@ public class CustomSpellHotBarWidget {
     }
 
     private static void renderCooldown(DrawContext context, float progress, int x, int y) {
-        // Copied from DrawContext.drawItemInSlot
-        var k = y + MathHelper.floor(16.0F * (1.0F - progress));
-        var l = k + MathHelper.ceil(16.0F * progress);
-        context.fill(RenderLayer.getGuiOverlay(), x, k, x + 16, l, Integer.MAX_VALUE);
+        if (progress <= 0) return;
+
+        int iconSize = 16;
+        int fillHeight = MathHelper.ceil(iconSize * progress);
+        int startY = y + iconSize - fillHeight;
+
+        // Dark red overlay for cooldown
+        context.fill(RenderLayer.getGuiOverlay(), x, startY, x + iconSize, y + iconSize, 0x88FFFFFF);
+
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
     }
+
+    private static void renderStamina(DrawContext context, float requiredStamina, int x, int y) {
+        if (requiredStamina <= 0) return;
+
+        var client = MinecraftClient.getInstance();
+        var player = client.player;
+        if (!(player instanceof IStaminaPlayer iStaminaPlayer)) return;
+
+        double playerStamina = iStaminaPlayer.onepiece$getStamina();
+        double staminaRatio = Math.min(1.0, playerStamina / requiredStamina);
+
+        int iconSize = 17;
+        int barWidth = 1;
+        int barHeight = 16;
+
+        // Background bar (dark)
+        context.fill(RenderLayer.getGuiOverlay(),
+                x + iconSize - barWidth, y,
+                x + iconSize, y + barHeight,
+                0xCC000000);
+
+        // Foreground bar (colored based on stamina)
+        int fillHeight = (int) (barHeight * staminaRatio);
+        int startY = y + barHeight - fillHeight;
+
+        // Color: Green -> Yellow -> Red based on stamina ratio
+        int color;
+        if (staminaRatio >= 1.0) {
+            color = 0xFF00FF00; // Bright green - enough stamina
+        } else if (staminaRatio >= 0.5) {
+            color = 0xFFFFFF00; // Yellow - medium stamina
+        } else if (staminaRatio > 0) {
+            color = 0xFFFF8800; // Orange - low stamina
+        } else {
+            color = 0xFFFF0000; // Red - no stamina
+        }
+
+        context.fill(RenderLayer.getGuiOverlay(),
+                x + iconSize - barWidth, startY,
+                x + iconSize, y + barHeight,
+                color);
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+    }
+
 }

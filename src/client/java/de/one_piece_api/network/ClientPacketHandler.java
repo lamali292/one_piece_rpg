@@ -3,7 +3,7 @@ package de.one_piece_api.network;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.gui.OnePieceScreen;
 import de.one_piece_api.registries.ClientStyleRegistry;
-import de.one_piece_api.util.ListenerUtil;
+import de.one_piece_api.util.ClientData;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
@@ -13,7 +13,7 @@ public class ClientPacketHandler {
         OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "Received class config: {}", classConfigPayload.configMap().keySet());
 
         var classConfig = classConfigPayload.configMap();
-        context.client().execute(() -> ListenerUtil.CLASS_CONFIG.set(classConfig));
+        context.client().execute(() -> ClientData.CLASS_CONFIG.set(classConfig));
     }
 
 
@@ -21,7 +21,7 @@ public class ClientPacketHandler {
         var id = devilFruitPayload.identifier();
         var devilFruitConfig = devilFruitPayload.config();
         OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "Received devil fruit config: {}", id);
-        context.client().execute(() -> ListenerUtil.DEVIL_FRUIT_CONFIG.set(devilFruitConfig));
+        context.client().execute(() -> ClientData.DEVIL_FRUIT_CONFIG.set(devilFruitConfig));
     }
 
     public static void handleUi(UiPayload uiPayload, ClientPlayNetworking.Context context) {

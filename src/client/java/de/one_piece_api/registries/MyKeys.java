@@ -2,7 +2,7 @@ package de.one_piece_api.registries;
 
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.gui.ClassScreen;
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.ICombatPlayer;
 import de.one_piece_api.network.SetCombatModePayload;
 import de.one_piece_api.gui.OnePieceScreen;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -45,7 +45,7 @@ public class MyKeys {
     }
 
     public static void toggleCombatMode(MinecraftClient client) {
-        if (client.player instanceof IOnePiecePlayer player) {
+        if (client.player instanceof ICombatPlayer player) {
             boolean newState = !player.onepiece$isCombatMode(); // toggle locally
             player.onepiece$setCombatMode(newState);
             client.player.sendMessage(

@@ -4,15 +4,18 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
+    "ClientSkillConfigMixin",
+    "ClientSkillConnectionConfigMixin",
     "GameRendererMixin",
     "HudRenderHelperMixin",
+    "InGameHudMixin",
     "KeyBoardMixin",
     "PostEffectProcessorMixin",
+    "ShowCategoryInPacketMixin",
     "SkillsClientModMixin",
     "SpellHotbarMixin",
-    "ShowCategoryInPacketMixin",
-    "ClientSkillConnectionConfigMixin",
-    "ClientSkillConfigMixin"
+    "HudMessagesMixin",
+    "SpellViewModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

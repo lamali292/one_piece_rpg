@@ -30,6 +30,7 @@ public class LangGen extends FabricLanguageProvider {
         builder.add("gui."+ OnePieceRPG.MOD_ID+".tab.devilfruit", "Fruit du démon");
         builder.add("gui."+ OnePieceRPG.MOD_ID+".tab.class", "Classes");
         builder.add("gui."+ OnePieceRPG.MOD_ID+".tab.haki", "Haki");
+        builder.add("hud.cast_attempt_error.insufficient_stamina", "Insufficient Stamina!");
 
         builder.add("key."+ OnePieceRPG.MOD_ID+"."+ MyKeys.TOGGLE_COMBAT_MODE, "Activate Combat Mode");
         builder.add("category."+ OnePieceRPG.MOD_ID+".controls", "One Piece RPG");

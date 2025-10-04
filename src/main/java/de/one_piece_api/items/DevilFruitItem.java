@@ -1,11 +1,7 @@
 package de.one_piece_api.items;
 
-import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.events.EventRegistry;
-import de.one_piece_api.interfaces.IOnePiecePlayer;
-import de.one_piece_api.network.DevilFruitPayload;
 import de.one_piece_api.registries.MyDataComponentTypes;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -13,7 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsage;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
 import net.minecraft.world.World;
@@ -21,7 +16,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class DevilFruitItem extends Item {
-    public static Identifier DEFAULT_DEVIL_FRUIT = Identifier.of("");
+    public static Identifier DEFAULT_DEVIL_FRUIT = Identifier.of("none");
 
     public DevilFruitItem(Settings settings) {
         super(settings.component(MyDataComponentTypes.DEVIL_FRUIT, DEFAULT_DEVIL_FRUIT));

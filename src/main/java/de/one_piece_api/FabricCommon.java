@@ -1,5 +1,6 @@
 package de.one_piece_api;
 
+import de.one_piece_api.registries.MyAttributes;
 import de.one_piece_api.registries.MyDataComponentTypes;
 import de.one_piece_api.registries.MyItems;
 import de.one_piece_api.registries.MyPayloads;
@@ -13,5 +14,6 @@ public class FabricCommon implements ModInitializer {
         MyDataComponentTypes.register();
         MyItems.register();
         MyPayloads.register();
+        MyAttributes.initialize();
     }
 }

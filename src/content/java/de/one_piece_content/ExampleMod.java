@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 public class ExampleMod implements DedicatedServerModInitializer {
 	public static final String MOD_ID = "one_piece_content";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static final Identifier CATEGORY_ID = Identifier.of("one_piece_api", "one_piece_api");
 
 	@Override
 	public void onInitializeServer() {

@@ -68,6 +68,7 @@ public class ExampleSpells {
                                 25.0f, 0.15f, 0.15f).preSpawnTravel(1)))
                 .cost(cost -> cost
                         .cooldown(8f)
+                        .stamina(10)
                         .exhaust(0.5f))
                 .build();
         return new SpellConfig(spell, "Shishi Sonson",
@@ -91,6 +92,7 @@ public class ExampleSpells {
                         .custom(ExampleMod.id("yakkodori").toString()))
                 .cost(cost -> cost
                         .cooldown(8f)
+                        .stamina(10)
                         .exhaust(0.5f))
                 .build();
 
@@ -161,6 +163,7 @@ public class ExampleSpells {
                         .fire(4))
                 .cost(cost -> cost
                         .cooldown(8)
+                        .stamina(15)
                         .exhaust(0.5f))
                 .build();
         return new SpellConfig(spell, "Sandstorm", "...");
