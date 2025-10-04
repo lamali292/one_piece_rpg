@@ -1,6 +1,7 @@
 package de.one_piece_api.items;
 
 import de.one_piece_api.OnePieceRPG;
+import de.one_piece_api.events.EventRegistry;
 import de.one_piece_api.interfaces.IOnePiecePlayer;
 import de.one_piece_api.network.DevilFruitPayload;
 import de.one_piece_api.registries.MyDataComponentTypes;
@@ -55,9 +56,9 @@ public class DevilFruitItem extends Item {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        Identifier id = stack.getOrDefault(MyDataComponentTypes.DEVIL_FRUIT, DEFAULT_DEVIL_FRUIT);
-        if (user instanceof IOnePiecePlayer player ) {
-            player.onepiece$setDevilFruit(id.toString());
+        if (user instanceof ServerPlayerEntity player) {
+            Identifier id = stack.getOrDefault(MyDataComponentTypes.DEVIL_FRUIT, DEFAULT_DEVIL_FRUIT);
+            EventRegistry.fireDevilFruitEaten(player, id);
         }
         return stack;
     }
