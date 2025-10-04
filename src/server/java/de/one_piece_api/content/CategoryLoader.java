@@ -38,9 +38,11 @@ public class CategoryLoader {
 
     private static List<SkillConfig> collectSkillsFromFruit(List<Identifier> skillIds) {
         List<SkillConfig> skillConfigs = new ArrayList<>();
+        int i = 0;
         for (Identifier skillId : skillIds) {
             String id = DataGenUtil.generateDeterministicId(skillId);
-            skillConfigs.add(new SkillConfig(id, 0, 0, skillId.toString(), true));
+            skillConfigs.add(new SkillConfig(id, 0, 0, skillId.toString(), i==0));
+            i++;
         }
         return skillConfigs;
     }
@@ -193,7 +195,7 @@ public class CategoryLoader {
             Map<Identifier, DevilFruitConfig> devilFruits,
             Map<Identifier, SkillsConfig> skills
     ) {
-        processDevilFruits(devilFruits, skills);
+        processDevilFruits(devilFruits, skills, connections);
 
         SkillDefinitionsConfig definitionsConfig = mergeDefinitions(definitions);
         SkillsConfig skillsConfig = mergeSkills(skills);
@@ -213,7 +215,8 @@ public class CategoryLoader {
 
     private static void processDevilFruits(
             Map<Identifier, DevilFruitConfig> devilFruits,
-            Map<Identifier, SkillsConfig> skills
+            Map<Identifier, SkillsConfig> skills,
+            Map<Identifier, SkillConnectionsConfig> connections
     ) {
         devilFruits.forEach((fruitId, fruitConfig) -> {
             Map<String, SkillConfig> skillConfigs = fruitConfig.paths().stream()
@@ -227,7 +230,43 @@ public class CategoryLoader {
                     ));
 
             skills.put(fruitId, new SkillsConfig(skillConfigs));
+
+            // Create connections for each path
+            List<SkillConnection> pathConnections = createPathConnections(fruitConfig);
+
+            // Store connections for this devil fruit
+            SkillConnectionsGroupConfig normalGroup = createConnectionGroup(pathConnections);
+            SkillConnectionsGroupConfig exclusiveGroup = createConnectionGroup(new ArrayList<>());
+
+            connections.put(fruitId, new SkillConnectionsConfig(normalGroup, exclusiveGroup));
         });
+    }
+
+    /**
+     * Creates linear connections between skills in each path of a devil fruit.
+     * Each skill connects to the next skill in the same path.
+     */
+    private static List<SkillConnection> createPathConnections(DevilFruitConfig fruitConfig) {
+        List<SkillConnection> connections = new ArrayList<>();
+
+        for (DevilFruitPathConfig path : fruitConfig.paths()) {
+            List<Identifier> pathSkills = path.skills();
+
+            // Create linear connections: skill[i] -> skill[i+1]
+            for (int i = 0; i < pathSkills.size() - 1; i++) {
+                String currentSkillId = DataGenUtil.generateDeterministicId(pathSkills.get(i));
+                String nextSkillId = DataGenUtil.generateDeterministicId(pathSkills.get(i + 1));
+
+                // Create unidirectional connection (current requires previous)
+                connections.add(new SkillConnection(
+                        currentSkillId,
+                        nextSkillId,
+                        false // not bidirectional - next skill requires current skill
+                ));
+            }
+        }
+
+        return connections;
     }
 
     private static void markSkillAsHidden(SkillConfig skillConfig) {

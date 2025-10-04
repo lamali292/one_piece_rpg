@@ -133,7 +133,7 @@ public class DescriptionPanelWidget implements Drawable {
 
     private void renderAdvanced(DrawContext context, int startY, int maxWidth) {
         Text advancedText = advanced.copy()
-                .setStyle(Style.EMPTY.withFormatting(Formatting.DARK_GRAY));
+                .setStyle(Style.EMPTY.withFont(MyFonts.PRESS_START).withFormatting(Formatting.DARK_GRAY));
 
         context.drawText(textRenderer, advancedText, x + PADDING, startY, 0xFF666666, false);
     }

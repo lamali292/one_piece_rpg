@@ -12,7 +12,6 @@ public class MyServerPayloads {
         ServerPlayNetworking.registerGlobalReceiver(SetSpellsPayload.TYPE, ServerPacketHandler::handleSetSpellsPayload);
         ServerPlayNetworking.registerGlobalReceiver(SetClassPayload.TYPE, ServerPacketHandler::handleSetClassPayload);
         ServerPlayNetworking.registerGlobalReceiver(UiPayload.TYPE, ServerPacketHandler::handleUi);
-        ServerPlayNetworking.registerGlobalReceiver(SkillClickPacket.TYPE, ServerPacketHandler::handleSkillClick);
     }
 
 }

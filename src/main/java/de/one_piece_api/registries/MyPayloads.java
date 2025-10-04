@@ -12,7 +12,6 @@ public class MyPayloads {
         PayloadTypeRegistry.playC2S().register(ClassConfigPayload.Request.TYPE, ClassConfigPayload.Request.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(DevilFruitPayload.Request.TYPE, DevilFruitPayload.Request.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(UiPayload.TYPE, UiPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(SkillClickPacket.TYPE, SkillClickPacket.STREAM_CODEC);
 
         PayloadTypeRegistry.playS2C().register(UiPayload.TYPE, UiPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ClassConfigPayload.TYPE, ClassConfigPayload.STREAM_CODEC);

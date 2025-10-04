@@ -61,6 +61,10 @@ sourceSets {
 
         compileClasspath += main.compileClasspath + main.output
         runtimeClasspath += main.runtimeClasspath + main.output
+        compileClasspath += server.compileClasspath + server.output
+        runtimeClasspath += server.runtimeClasspath + server.output
+
+
     }
 }
 
@@ -86,6 +90,8 @@ loom {
             source(sourceSets["client"])
             programArgs("--username", "FabricDev")
             runDir = "run"
+            vmArgs("-javaagent:C:/Users/lamal/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.16.3+mixin.0.8.7/3e535042688d1265447e52ad86950b7d9678a5fa/sponge-mixin-0.16.3+mixin.0.8.7.jar")
+
         }
 
         runs.getByName("server") {
@@ -94,6 +100,7 @@ loom {
             source(sourceSets["main"])
             source(sourceSets["server"])
             runDir = "server"
+            vmArgs("-javaagent:C:/Users/lamal/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.16.3+mixin.0.8.7/3e535042688d1265447e52ad86950b7d9678a5fa/sponge-mixin-0.16.3+mixin.0.8.7.jar")
         }
 
         create("datagen") {

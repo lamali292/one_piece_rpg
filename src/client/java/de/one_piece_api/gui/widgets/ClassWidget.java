@@ -3,36 +3,40 @@ package de.one_piece_api.gui.widgets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.ClassConfig;
-import de.one_piece_api.registries.MyShaders;
 import de.one_piece_api.util.TextureFramebufferCache;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.function.Consumer;
 
 /**
  * Widget representing a selectable character class in the UI.
- * Handles rendering and interaction for a single class option.
+ * Handles rendering and interaction for a single class option with smooth scaling.
  */
 public class ClassWidget implements Drawable, Element {
 
     private static final Identifier SELECT_RECT = OnePieceRPG.id("textures/gui/class/select_rect.png");
     private static final Identifier SELECT_TEXT = OnePieceRPG.id("textures/gui/class/select_text.png");
 
-
     // Base dimensions at reference scale
-    private static final int BASE_WIDTH = 500;
-    private static final int BASE_HEIGHT = 720;
-    private static final int BASE_NAME_DIM = 180;
-    private static final int NAME_BOTTOM_MARGIN = 10;
+    private static final float BASE_WIDTH = 500;
+    private static final float BASE_HEIGHT = 720;
+    private static final float BASE_NAME_DIM = 180;
+    private static final float NAME_BOTTOM_MARGIN = 10;
 
-    private static final int SELECT_RECT_WIDTH = 313;
-    private static final int SELECT_RECT_HEIGHT = 90;
-    private static final int SELECT_TEXT_WIDTH = 214;
-    private static final int SELECT_TEXT_HEIGHT = 35;
+    private static final float SELECT_RECT_WIDTH = 313;
+    private static final float SELECT_RECT_HEIGHT = 90;
+    private static final float SELECT_TEXT_WIDTH = 214;
+    private static final float SELECT_TEXT_HEIGHT = 35;
+
+    // Animation constants
+    private static final float SCALE_SPEED = 0.2f; // Interpolation speed per second
+    private static final float TARGET_SCALE_HOVERED = 1.1f;
+    private static final float TARGET_SCALE_NORMAL = 1.0f;
 
     // Immutable data
     private final Identifier classId;
@@ -46,6 +50,10 @@ public class ClassWidget implements Drawable, Element {
     // Rendering state
     private boolean isHovered = false;
     private boolean anyHovered = false;
+
+    // Animation state
+    private float currentScale = 1.0f;
+    private float targetScale = 1.0f;
 
     /**
      * Creates a new class widget.
@@ -78,32 +86,40 @@ public class ClassWidget implements Drawable, Element {
     /**
      * Sets whether this widget should be rendered in color or grayscale.
      *
-     * @param colored true for color rendering, false for grayscale
+     * @param hovered true for color rendering, false for grayscale
      */
-    public void setHovered(boolean colored) {
-        this.isHovered = colored;
+    public void setHovered(boolean hovered) {
+        this.isHovered = hovered;
+        this.targetScale = hovered ? TARGET_SCALE_HOVERED : TARGET_SCALE_NORMAL;
     }
 
     public void setAnyHovered(boolean anyHovered) {
         this.anyHovered = anyHovered;
     }
 
-
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         bounds.updateScreenPosition();
 
-        float scaleFactor = isHovered ? 1.1f : 1.0f;
-        int scaledWidth = (int) (bounds.width * scaleFactor);
-        int scaledHeight = (int) (bounds.height * scaleFactor);
-        int scaledOffsetX = (int) (bounds.width * (scaleFactor - 1) / 2);
-        int scaledOffsetY = (int) (bounds.height * (scaleFactor - 1) / 2);
+        // Smoothly interpolate current scale towards target scale using delta time
+        float lerpFactor = 1.0f - (float) Math.pow(0.001, delta * SCALE_SPEED);
+        currentScale = MathHelper.lerp(lerpFactor, currentScale, targetScale);
 
-        int scaledNameDim = (int) (bounds.nameDim * scaleFactor);
-        int scaledSelectRectWidth = (int) (bounds.selectRectWidth * scaleFactor);
-        int scaledSelectRectHeight = (int) (bounds.selectRectHeight * scaleFactor);
-        int scaledSelectTextWidth = (int) (bounds.selectTextWidth * scaleFactor);
-        int scaledSelectTextHeight = (int) (bounds.selectTextHeight * scaleFactor);
+        // Snap to target if very close to avoid floating point drift
+        if (Math.abs(currentScale - targetScale) < 0.001f) {
+            currentScale = targetScale;
+        }
+
+        int scaledWidth = (int) (bounds.width * currentScale);
+        int scaledHeight = (int) (bounds.height * currentScale);
+        float scaledOffsetX = bounds.width * (currentScale - 1) / 2;
+        float scaledOffsetY = bounds.height * (currentScale - 1) / 2;
+
+        int scaledNameDim = (int) (bounds.nameDim * currentScale);
+        int scaledSelectRectWidth = (int) (bounds.selectRectWidth * currentScale);
+        int scaledSelectRectHeight = (int) (bounds.selectRectHeight * currentScale);
+        int scaledSelectTextWidth = (int) (bounds.selectTextWidth * currentScale);
+        int scaledSelectTextHeight = (int) (bounds.selectTextHeight * currentScale);
 
         // Determine which texture to use (cached grayscale or original)
         Identifier backTexture = isHovered || !anyHovered ?
@@ -114,8 +130,8 @@ public class ClassWidget implements Drawable, Element {
         RenderSystem.enableBlend();
         context.drawTexture(
                 backTexture,
-                bounds.x - scaledOffsetX,
-                bounds.y - scaledOffsetY,
+                (int) (bounds.x - scaledOffsetX),
+                (int) (bounds.y - scaledOffsetY),
                 0f, 0f,
                 scaledWidth, scaledHeight,
                 scaledWidth, scaledHeight
@@ -126,11 +142,11 @@ public class ClassWidget implements Drawable, Element {
         Identifier nameTexture = config.nameTexture();
 
         // Draw name badge
-        int nameY = bounds.y + bounds.height - scaledNameDim - NAME_BOTTOM_MARGIN + scaledOffsetY;
+        int nameY = (int) (bounds.y + bounds.height - scaledNameDim - NAME_BOTTOM_MARGIN + scaledOffsetY);
         RenderSystem.enableBlend();
         context.drawTexture(
                 nameTexture,
-                bounds.x - scaledOffsetX,
+                (int) (bounds.x - scaledOffsetX),
                 nameY,
                 0, 0,
                 scaledNameDim, scaledNameDim,
@@ -139,15 +155,28 @@ public class ClassWidget implements Drawable, Element {
         RenderSystem.disableBlend();
 
         // Draw selection rectangle and text (always colored)
-        int rectY = (int) (bounds.y + bounds.height - 12*scaleFactor + scaledOffsetY);
-        int textY = (int) (bounds.y + bounds.height - 7*scaleFactor + scaledOffsetY);
-        int rectX = (int) (bounds.x + 15*scaleFactor - scaledOffsetX);
-        int textX = (int) (bounds.x + 25*scaleFactor - scaledOffsetX);
+        // Position rect first, then position text relative to rect to maintain alignment
+        float rectXBase = 15;
+        float rectYBase = bounds.height - 12;
+
+        float rectXOffset = rectXBase * currentScale;
+        float rectYOffset = rectYBase * currentScale;
+
+        float rectX = (bounds.x + rectXOffset - scaledOffsetX);
+        float rectY = (bounds.y + rectYOffset - scaledOffsetY);
+
+        // Text is positioned 10 pixels to the right and 5 pixels up from rect (in base coordinates)
+        // These offsets should also scale
+        float textOffsetFromRectX = 10 * currentScale;
+        float textOffsetFromRectY = 5 * currentScale;
+
+        int textX = (int) (rectX + textOffsetFromRectX);
+        int textY = (int) (rectY + textOffsetFromRectY);
 
         RenderSystem.enableBlend();
         context.drawTexture(
                 SELECT_RECT,
-                rectX, rectY,
+                (int) rectX, (int) rectY,
                 0, 0,
                 scaledSelectRectWidth, scaledSelectRectHeight,
                 scaledSelectRectWidth, scaledSelectRectHeight
@@ -190,30 +219,28 @@ public class ClassWidget implements Drawable, Element {
         return classId;
     }
 
-
-
     /**
      * Internal class to encapsulate widget positioning and dimensions.
      * Reduces duplication and makes layout calculations explicit.
      */
     private static class WidgetBounds {
-        int x, y;
-        int width, height;
-        int nameDim;
-        int selectTextWidth, selectTextHeight;
-        int selectRectWidth, selectRectHeight;
+        float x, y;
+        float width, height;
+        float nameDim;
+        float selectTextWidth, selectTextHeight;
+        float selectRectWidth, selectRectHeight;
 
         private int containerWidth;
         private float relativeOffset;
 
         void update(float scale, int containerWidth, float relativeOffset) {
-            this.width = (int) (scale * BASE_WIDTH);
-            this.height = (int) (scale * BASE_HEIGHT);
-            this.nameDim = (int) (scale * BASE_NAME_DIM);
-            this.selectTextWidth = (int) (scale * SELECT_TEXT_WIDTH);
-            this.selectTextHeight = (int) (scale * SELECT_TEXT_HEIGHT);
-            this.selectRectWidth = (int) (scale * SELECT_RECT_WIDTH);
-            this.selectRectHeight = (int) (scale * SELECT_RECT_HEIGHT);
+            this.width = (scale * BASE_WIDTH);
+            this.height = (scale * BASE_HEIGHT);
+            this.nameDim = (scale * BASE_NAME_DIM);
+            this.selectTextWidth = (scale * SELECT_TEXT_WIDTH);
+            this.selectTextHeight = (scale * SELECT_TEXT_HEIGHT);
+            this.selectRectWidth = (scale * SELECT_RECT_WIDTH);
+            this.selectRectHeight = (scale * SELECT_RECT_HEIGHT);
             this.containerWidth = containerWidth;
             this.relativeOffset = relativeOffset;
         }
@@ -224,8 +251,8 @@ public class ClassWidget implements Drawable, Element {
             int screenHeight = client.getWindow().getScaledHeight();
 
             // Calculate horizontal position with offset
-            this.x = (int) ((screenWidth - width + relativeOffset * containerWidth) / 2.0f);
-            this.y = (screenHeight - height) / 2;
+            this.x = ((screenWidth - width + relativeOffset * containerWidth) / 2.0f);
+            this.y = ((screenHeight - height) / 2);
         }
 
         boolean contains(double mouseX, double mouseY) {

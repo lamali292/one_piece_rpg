@@ -1,5 +1,6 @@
 package de.one_piece_api.network;
 
+import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_api.content.DataLoader;
 import de.one_piece_api.interfaces.IOnePiecePlayer;
@@ -20,6 +21,8 @@ public class ServerPacketHandler {
 
 
     public static void handleSetClassPayload(SetClassPayload payload, ServerPlayNetworking.Context context) {
+        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} set class: {}", context.player().getName().getString(), payload.className());
+
         context.server().execute(() -> {
             if (context.player() instanceof IOnePiecePlayer player) {
                 player.onepiece$setOnePieceClass(payload.className());
@@ -28,6 +31,8 @@ public class ServerPacketHandler {
     }
 
     public static void handleSetCombatModePayload(SetCombatModePayload payload, ServerPlayNetworking.Context context) {
+        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} swapped combat mode: {}", context.player().getName().getString(), payload.mode());
+
         context.server().execute(() -> {
             if (context.player() instanceof IOnePiecePlayer player) {
                 player.onepiece$setCombatMode(payload.mode());
@@ -38,6 +43,7 @@ public class ServerPacketHandler {
     }
 
     public static void handleSetSpellsPayload(SetSpellsPayload payload, ServerPlayNetworking.Context context) {
+        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} swapped combat mode: {}", context.player().getName().getString(), payload.spells());
         context.server().execute(() -> {
             if (context.player() instanceof IOnePiecePlayer player) {
                 player.onepiece$setSelectedSpellIds(payload.spells());
@@ -46,18 +52,20 @@ public class ServerPacketHandler {
     }
 
     public static void handleClassConfigRequest(ClassConfigPayload.Request request, ServerPlayNetworking.Context context) {
+        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} requested classes", context.player().getName().getString());
+
         context.server().execute(() -> context.responseSender().sendPacket(new ClassConfigPayload(DataLoader.CLASS_LOADER.getItems())));
     }
 
     public static void handleDevilFruitRequest(DevilFruitPayload.Request request, ServerPlayNetworking.Context context) {
-
+        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} requested devil fruits: {}", context.player().getName().getString(), request.identifier().toString() );
         context.server().execute(() -> {
-            Identifier id  =request.identifier();
+            Identifier id = request.identifier();
             DevilFruitConfig config = DataLoader.DEVIL_FRUIT_LOADER.getItems().get(id);
             if (config == null) {
                 config = new DevilFruitConfig(List.of(), List.of(), Identifier.of(""));
             }
-            context.responseSender().sendPacket(new DevilFruitPayload(config));
+            context.responseSender().sendPacket(new DevilFruitPayload(id, config));
         });
     }
 
@@ -80,6 +88,7 @@ public class ServerPacketHandler {
     };
 
     public static void handleUi(UiPayload uiPayload, ServerPlayNetworking.Context context) {
+        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} clicked ui: {}", context.player().getName().getString(), uiPayload.ui());
         ServerPlayerEntity player = context.player();
         context.server().execute(() -> {
             switch (uiPayload.ui()) {
@@ -88,16 +97,6 @@ public class ServerPacketHandler {
                     ParticleHelper.sendBatches(player, RESET_PARTICLES);
                     context.responseSender().sendPacket(uiPayload);
                 }
-            }
-        });
-
-    }
-
-    public static void handleSkillClick(SkillClickPacket packet, ServerPlayNetworking.Context context) {
-        context.server().execute(() -> {
-            ServerPlayerEntity player = context.player();
-            if (!player.isSpectator()) {
-                SkillsMod.getInstance().tryUnlockSkill(player, packet.categoryId(), packet.skillId(), false);
             }
         });
 

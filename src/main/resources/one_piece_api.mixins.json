@@ -4,6 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "one_piece_api.refmap.json",
   "mixins": [
+    "EntityMixin",
+    "LivinEntityMixin",
     "PlayerEntityMixin",
     "SkillConfigMixin",
     "SkillConnectionMixin",

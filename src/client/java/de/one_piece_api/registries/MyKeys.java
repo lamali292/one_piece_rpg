@@ -1,10 +1,10 @@
 package de.one_piece_api.registries;
 
 import de.one_piece_api.OnePieceRPG;
+import de.one_piece_api.gui.ClassScreen;
 import de.one_piece_api.interfaces.IOnePiecePlayer;
 import de.one_piece_api.network.SetCombatModePayload;
 import de.one_piece_api.gui.OnePieceScreen;
-import de.one_piece_api.gui.managers.ClassScreenManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -28,8 +28,8 @@ public class MyKeys {
 
     public static void register() {
         registerHotkeys(GLFW.GLFW_KEY_G, TOGGLE_COMBAT_MODE, MyKeys::toggleCombatMode);
-        registerHotkeys(GLFW.GLFW_KEY_H, OPEN_SKILL_TREE_KEY, client -> client.setScreen(new OnePieceScreen(client.player)));
-        registerHotkeys(GLFW.GLFW_KEY_J, OPEN_CLASS, client -> ClassScreenManager.getInstance().openScreen(client.player));
+        registerHotkeys(GLFW.GLFW_KEY_H, OPEN_SKILL_TREE_KEY, client -> OnePieceScreen.getInstance().open(client));
+        registerHotkeys(GLFW.GLFW_KEY_J, OPEN_CLASS, client -> ClassScreen.getInstance().open(client));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             keyBindings.forEach((id, key) -> {

@@ -1,16 +1,15 @@
 package de.one_piece_api.content;
 
 import de.one_piece_api.OnePieceRPG;
+import de.one_piece_api.util.LoaderContext;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonPath;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
-import net.puffish.skillsmod.impl.config.ConfigContextImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,11 +17,11 @@ import java.util.function.BiFunction;
 
 public class GenericLoader<T> implements SimpleSynchronousResourceReloadListener {
     private final Map<Identifier, T> items = new HashMap<>();
-    private final BiFunction<JsonElement, ConfigContext, Result<T, Problem>> parser;
+    private final BiFunction<JsonElement, LoaderContext, Result<T, Problem>> parser;
     private final String folderName;
     private MinecraftServer server;
 
-    public GenericLoader(String folderName, BiFunction<JsonElement, ConfigContext, Result<T, Problem>> parser) {
+    public GenericLoader(String folderName, BiFunction<JsonElement, LoaderContext, Result<T, Problem>> parser) {
         this.folderName = folderName;
         this.parser = parser;
     }
@@ -42,7 +41,7 @@ public class GenericLoader<T> implements SimpleSynchronousResourceReloadListener
         if (server == null) {
             return;
         }
-        ConfigContext context = new ConfigContextImpl(server);
+
         items.clear();
         HashMap<String, Integer> loaded = new HashMap<>();
         HashMap<String, Integer> failed = new HashMap<>();
@@ -53,7 +52,7 @@ public class GenericLoader<T> implements SimpleSynchronousResourceReloadListener
                 fileName = fileName.substring(0, fileName.length() - 5);
             }
             Identifier id = Identifier.of(fileId.getNamespace(), fileName);
-
+            LoaderContext context = new LoaderContext(server, id);
             try (var reader = resource.getReader()) {
                 JsonElement root = JsonElement.parseReader(reader, JsonPath.create(fileId.toString()))
                         .getSuccess()
