@@ -10,7 +10,8 @@
     "cooldown": {
       "duration": 8.0
     },
-    "exhaust": 0.5
+    "exhaust": 0.5,
+    "stamina": 10.0
   },
   "deliver": {
     "type": "CUSTOM",

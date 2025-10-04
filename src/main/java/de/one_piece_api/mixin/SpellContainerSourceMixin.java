@@ -1,6 +1,6 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.ICombatPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
@@ -42,7 +42,7 @@ public class SpellContainerSourceMixin {
         // equipment sets
         updateEquipmentSets(player, allContainers);
 
-        boolean combat = ((IOnePiecePlayer) player).onepiece$isCombatMode();
+        boolean combat = ((ICombatPlayer) player).onepiece$isCombatMode();
 
         SpellContainer activeContainer;
         List<RegistryEntry<Spell>> activeSpells;

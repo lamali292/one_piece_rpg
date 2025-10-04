@@ -1,6 +1,6 @@
 package de.one_piece_api.util;
 
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.ISpellPlayer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class SpellUtil {
     public static List<RegistryEntry<Spell>> getPlayerSpells(ClientPlayerEntity player) {
-        if (player instanceof IOnePiecePlayer onePiecePlayer) {
+        if (player instanceof ISpellPlayer onePiecePlayer) {
             return onePiecePlayer.onepiece$getSelectedSpells();
         }
         return List.of();

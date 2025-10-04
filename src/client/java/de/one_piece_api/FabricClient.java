@@ -1,7 +1,7 @@
 package de.one_piece_api;
 
 import de.one_piece_api.registries.*;
-import de.one_piece_api.util.ListenerUtil;
+import de.one_piece_api.util.ClientData;
 import de.one_piece_api.util.TextureFramebufferCache;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -21,7 +21,7 @@ public class FabricClient implements ClientModInitializer {
         MyShaders.init();
         MyFonts.register();
         MySounds.register();
-        ListenerUtil.init();
+        ClientData.init();
         ModelLoadingPlugin.register(e ->
                 e.addModels(Identifier.of(OnePieceRPG.MOD_ID, "fireball")));
 

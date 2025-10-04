@@ -3,7 +3,9 @@ package de.one_piece_api.network;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_api.content.DataLoader;
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.IClassPlayer;
+import de.one_piece_api.interfaces.ICombatPlayer;
+import de.one_piece_api.interfaces.ISpellPlayer;
 import de.one_piece_api.util.SkillHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,7 +23,7 @@ public class ServerPacketHandler {
         OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} set class: {}", context.player().getName().getString(), payload.className());
 
         context.server().execute(() -> {
-            if (context.player() instanceof IOnePiecePlayer player) {
+            if (context.player() instanceof IClassPlayer player) {
                 player.onepiece$setOnePieceClass(payload.className());
             }
         });
@@ -31,7 +33,7 @@ public class ServerPacketHandler {
         OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} swapped combat mode: {}", context.player().getName().getString(), payload.mode());
 
         context.server().execute(() -> {
-            if (context.player() instanceof IOnePiecePlayer player) {
+            if (context.player() instanceof ICombatPlayer player) {
                 player.onepiece$setCombatMode(payload.mode());
                 SpellContainerSource.update(context.player());
             }
@@ -40,9 +42,9 @@ public class ServerPacketHandler {
     }
 
     public static void handleSetSpellsPayload(SetSpellsPayload payload, ServerPlayNetworking.Context context) {
-        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} swapped combat mode: {}", context.player().getName().getString(), payload.spells());
+        OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} swapped spell hotbar: {}", context.player().getName().getString(), payload.spells());
         context.server().execute(() -> {
-            if (context.player() instanceof IOnePiecePlayer player) {
+            if (context.player() instanceof ISpellPlayer player) {
                 player.onepiece$setSelectedSpellIds(payload.spells());
             }
         });

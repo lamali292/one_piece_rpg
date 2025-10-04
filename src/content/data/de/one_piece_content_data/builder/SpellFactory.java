@@ -1,5 +1,6 @@
 package de.one_piece_content_data.builder;
 
+import de.one_piece_api.interfaces.IStaminaCost;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.util.Identifier;
 import net.spell_engine.api.spell.Spell;
@@ -574,6 +575,13 @@ public class SpellFactory {
 
         public CostBuilder exhaust(float amount) {
             cost.exhaust = amount;
+            return this;
+        }
+
+        public CostBuilder stamina(float amount) {
+            if (cost instanceof IStaminaCost staminaCost) {
+                staminaCost.onepiece$setStaminaCost(amount);
+            }
             return this;
         }
 

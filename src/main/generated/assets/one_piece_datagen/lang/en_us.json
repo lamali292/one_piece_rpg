@@ -7,6 +7,7 @@
   "gui.one_piece_api.tab.class": "Classes",
   "gui.one_piece_api.tab.devilfruit": "Fruit du démon",
   "gui.one_piece_api.tab.haki": "Haki",
+  "hud.cast_attempt_error.insufficient_stamina": "Insufficient Stamina!",
   "item.one_piece_api.devil_fruit": "Devil Fruit",
   "key.one_piece_api.combat_mode": "Activate Combat Mode"
 }

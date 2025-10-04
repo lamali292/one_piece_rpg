@@ -22,7 +22,8 @@
     "cooldown": {
       "duration": 8.0
     },
-    "exhaust": 0.5
+    "exhaust": 0.5,
+    "stamina": 15.0
   },
   "deliver": {
     "type": "PROJECTILE",

@@ -4,12 +4,19 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "one_piece_api.refmap.json",
   "mixins": [
+    "ClassPlayerMixin",
+    "CombatPlayerMixin",
+    "DevilFruitPlayerMixin",
     "EntityMixin",
     "LivinEntityMixin",
-    "PlayerEntityMixin",
     "SkillConfigMixin",
     "SkillConnectionMixin",
-    "SpellContainerSourceMixin"
+    "SpellCastResultMixin",
+    "SpellContainerSourceMixin",
+    "SpellCostMixin",
+    "SpellHelperMixin",
+    "SpellPlayerMixin",
+    "StaminaPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

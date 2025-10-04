@@ -1,6 +1,7 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.interfaces.ICombatPlayer;
+import de.one_piece_api.interfaces.ISpellPlayer;
 import de.one_piece_api.util.SpellUtil;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.GameOptions;
@@ -51,10 +52,9 @@ public abstract class SpellHotbarMixin {
 
         // block ALL spells when not in combat mode
 
-        if (player instanceof IOnePiecePlayer iOnePiecePlayer && iOnePiecePlayer.onepiece$isCombatMode()) {
+        if (player instanceof ISpellPlayer iOnePiecePlayer && player instanceof ICombatPlayer iCombatPlayer &&  iCombatPlayer.onepiece$isCombatMode()) {
             List<RegistryEntry<Spell>> spells = iOnePiecePlayer.onepiece$getSelectedSpells();
             List<RegistryEntry<Spell>> learned = SpellUtil.getLearnedSpells(player);
-            boolean inCombat =  iOnePiecePlayer.onepiece$isCombatMode();
 
             for (int i = 0; i < spells.size(); i++) {
                 RegistryEntry<Spell> spellEntry = spells.get(i);
@@ -63,7 +63,7 @@ public abstract class SpellHotbarMixin {
                 if (spell == null) continue;
 
                 // skip spells that aren’t learned while in combat
-                if (inCombat && !learned.contains(spellEntry)) {
+                if (!learned.contains(spellEntry)) {
                     continue;
                 }
 
