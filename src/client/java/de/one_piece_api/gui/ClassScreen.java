@@ -7,11 +7,11 @@ import de.one_piece_api.gui.widgets.ClassWidget;
 import de.one_piece_api.network.ClassConfigPayload;
 import de.one_piece_api.network.SetClassPayload;
 import de.one_piece_api.registries.MySounds;
+import de.one_piece_api.util.ListenerUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.screen.ScreenTexts;
@@ -51,15 +51,26 @@ public class ClassScreen extends Screen {
     private final List<ClassWidget> classWidgets = new ArrayList<>();
     private final ScreenDimensions dimensions = new ScreenDimensions();
 
-    public ClassScreen(ClientPlayerEntity player) {
+
+    private static ClassScreen instance = null;
+
+    public static ClassScreen getInstance() {
+        if (instance == null) {
+            instance = new ClassScreen();
+        }
+        return instance;
+    }
+
+    public ClassScreen() {
         super(ScreenTexts.EMPTY);
+        ListenerUtil.CLASS_CONFIG.addListener(this::onClassConfigChange);
     }
 
     /**
      * Updates the available class options and recreates widgets.
      * Called when class configuration is received from server.
      */
-    public void updateAvailableClasses(Map<Identifier, ClassConfig> classConfigs) {
+    private void onClassConfigChange(Map<Identifier, ClassConfig> classConfigs) {
         classWidgets.clear();
 
         if (classConfigs.isEmpty()) {
@@ -261,6 +272,10 @@ public class ClassScreen extends Screen {
     @Override
     public boolean shouldPause() {
         return false;
+    }
+
+    public void open(MinecraftClient client) {
+        client.setScreen(this);
     }
 
     /**

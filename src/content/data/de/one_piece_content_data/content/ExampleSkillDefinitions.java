@@ -11,6 +11,7 @@ import de.one_piece_content_data.rewards.AttributeReward;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ExampleSkillDefinitions {
 
@@ -29,6 +31,31 @@ public class ExampleSkillDefinitions {
     public static void init() {
     }
 
+
+
+    public static List<Entry<SkillDefinitionConfig>> ITEM_ENTRIES = Stream
+            .of(Items.SPYGLASS, Items.APPLE, Items.SWEET_BERRIES, Items.STONE_SWORD, Items.SPONGE, Items.SADDLE, Items.BEEHIVE,
+                    Items.DIAMOND_SWORD, Items.STONE_HOE, Items.DIAMOND_SHOVEL, Items.ACACIA_HANGING_SIGN, Items.ARMADILLO_SPAWN_EGG, Items.GOLD_ORE, Items.GREEN_GLAZED_TERRACOTTA,
+                    Items.GREEN_DYE, Items.CHERRY_LEAVES, Items.COOKED_RABBIT, Items.CREEPER_BANNER_PATTERN, Items.CUT_RED_SANDSTONE, Items.BUBBLE_CORAL_BLOCK, Items.CUT_COPPER_STAIRS,
+                    Items.BARRIER, Items.STONE_AXE, Items.ACACIA_BOAT, Items.NETHERITE_AXE, Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE, Items.LEVER, Items.SCULK_VEIN,
+                    Items.GLASS, Items.GLASS_BOTTLE, Items.GHAST_TEAR, Items.GLASS_PANE, Items.GLOW_BERRIES, Items.GLOW_LICHEN, Items.GOLD_BLOCK)
+            .map(net.minecraft.registry.Registries.ITEM::getId)
+            .map(ExampleSkillDefinitions::dummySkill).toList();
+    public static Entry<SkillDefinitionConfig> dummySkill(Identifier id) {
+        Item item = net.minecraft.registry.Registries.ITEM.get(id);
+        String description = item.getName().getString() + " description text";
+        var config = new SkillDefinitionConfig(
+                item.getName(),
+                Text.literal(description),
+                null,
+                Icon.item(item),
+                null,
+                1,
+                List.of(),
+                1, 1, 0, 0, 1
+        );
+        return Registries.SKILL_DEFINITION.register(ExampleMod.id(id.getPath()), config);
+    }
 
     public static Entry<SkillDefinitionConfig> dummySpell(Identifier spellId) {
         SpellContainer container = SpellContainerHelper.createForMeleeWeapon(spellId);

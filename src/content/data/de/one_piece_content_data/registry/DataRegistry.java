@@ -13,6 +13,9 @@ public record DataRegistry<T>(
     }
 
     public Entry<T> register(Identifier id, T entry) {
+        if (entries.containsKey(id)) {
+            throw new IllegalArgumentException("Duplicate entry for id " + id);
+        }
         entries.put(id, entry);
         return new Entry<>(id, entry);
     }

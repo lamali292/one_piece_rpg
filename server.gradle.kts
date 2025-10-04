@@ -131,7 +131,7 @@ tasks.register("httpServer") {
 tasks.named("runServer") {
     dependsOn("contentJar")
     dependsOn("prepareServer")
-    dependsOn("httpServer")
+    //dependsOn("httpServer")
     doLast {
         println("Minecraft server is now running while HTTP server runs in the background.")
     }

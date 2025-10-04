@@ -95,13 +95,13 @@ public class SkillTreeViewportWidget implements Drawable, Element {
         int halfContentWidth = MathHelper.ceilDiv(this.bounds.height() * viewportWidth, viewportHeight * 2);
         int halfContentHeight = MathHelper.ceilDiv(this.bounds.width() * viewportHeight, viewportWidth * 2);
 
-        this.bounds.extend(new Vector2i(-halfContentWidth - 20, -halfContentHeight - 20));
-        this.bounds.extend(new Vector2i(halfContentWidth + 20, halfContentHeight + 20));
+        this.bounds.extend(new Vector2i(-halfContentWidth, -halfContentHeight));
+        this.bounds.extend(new Vector2i(halfContentWidth, halfContentHeight));
 
         this.minScale = Math.max(
                 (float) viewportWidth / this.bounds.width(),
                 (float) viewportHeight / this.bounds.height()
-        );
+        ) * 0.75F;
         this.maxScale = 2f;
 
         applyViewChanges(
@@ -119,14 +119,37 @@ public class SkillTreeViewportWidget implements Drawable, Element {
         int halfWidth = viewportWidth / 2;
         int halfHeight = viewportHeight / 2;
 
-        categoryData.setX(MathHelper.clamp(x,
-                (int) Math.ceil(halfWidth - bounds.max().x() * scale),
-                (int) Math.floor(-halfWidth - bounds.min().x() * scale)
-        ));
-        categoryData.setY(MathHelper.clamp(y,
-                (int) Math.ceil(halfHeight - bounds.max().y() * scale),
-                (int) Math.floor(-halfHeight - bounds.min().y() * scale)
-        ));
+        // Calculate the actual content size at this scale
+        int scaledWidth = (int) (bounds.width() * scale);
+        int scaledHeight = (int) (bounds.height() * scale);
+
+        // Add padding to allow dragging beyond viewport edges
+        int dragPadding = 40; // Adjust this value for more/less drag range
+
+        int minX, maxX, minY, maxY;
+
+        if (scaledWidth < viewportWidth) {
+            // Allow dragging with padding even when smaller than viewport
+            int centerOffset = (viewportWidth - scaledWidth) / 2;
+            minX = -centerOffset - dragPadding;
+            maxX = centerOffset + dragPadding;
+        } else {
+            minX = (int) Math.ceil(halfWidth - bounds.max().x() * scale);
+            maxX = (int) Math.floor(-halfWidth - bounds.min().x() * scale);
+        }
+
+        if (scaledHeight < viewportHeight) {
+            // Allow dragging with padding even when smaller than viewport
+            int centerOffset = (viewportHeight - scaledHeight) / 2;
+            minY = -centerOffset - dragPadding;
+            maxY = centerOffset + dragPadding;
+        } else {
+            minY = (int) Math.ceil(halfHeight - bounds.max().y() * scale);
+            maxY = (int) Math.floor(-halfHeight - bounds.min().y() * scale);
+        }
+
+        categoryData.setX(MathHelper.clamp(x, minX, maxX));
+        categoryData.setY(MathHelper.clamp(y, minY, maxY));
         categoryData.setScale(MathHelper.clamp(scale, minScale, maxScale));
     }
 
@@ -149,7 +172,7 @@ public class SkillTreeViewportWidget implements Drawable, Element {
         Text titleText = Text.translatable("gui." + OnePieceRPG.MOD_ID + ".skill.skilltree")
                 .setStyle(Style.EMPTY.withFont(MyFonts.MONTSERRAT).withFormatting(Formatting.UNDERLINE));
         int textWidth = client.textRenderer.getWidth(titleText);
-        int textX = OnePieceScreen.skilltreeOffsetX + (OnePieceScreen.skilltreeWidth - textWidth) / 2 + viewportX;
+        int textX = OnePieceScreen.Layout.SKILLTREE_OFFSET_X + (OnePieceScreen.Layout.SKILLTREE_WIDTH - textWidth) / 2 + viewportX;
         int textY = 4 + viewportY;
 
         context.drawText(client.textRenderer, titleText, textX, textY, 0xffffffff, false);
@@ -303,7 +326,8 @@ public class SkillTreeViewportWidget implements Drawable, Element {
                 var scaling = guiAtlasManager.getScaling(sprite);
                 var color = switch (state) {
                     case LOCKED, EXCLUDED -> COLOR_GRAY;
-                    case AVAILABLE, AFFORDABLE, UNLOCKED -> COLOR_WHITE;
+                    case AFFORDABLE, UNLOCKED -> COLOR_WHITE;
+                    case AVAILABLE -> new Vector4f(0.8f, 0.4f, 0.4f, 1.0F);
                 };
                 textureRenderer.emitSprite(context, sprite, scaling,
                         x - halfSize, y - halfSize, size, size, color);

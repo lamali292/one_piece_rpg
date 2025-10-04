@@ -22,9 +22,6 @@ public record ClassConfig(Text name, Text description, String primary, String pa
     }
 
 
-
-    public record ColorPairConfig(ColorConfig primary, ColorConfig secondary) { }
-
     public static Result<ClassConfig, Problem> parse(JsonObject rootObject, ConfigContext context) {
         var problems = new ArrayList<Problem>();
 

@@ -2,13 +2,16 @@ package de.one_piece_api.items;
 
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.interfaces.IOnePiecePlayer;
+import de.one_piece_api.network.DevilFruitPayload;
 import de.one_piece_api.registries.MyDataComponentTypes;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsage;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
@@ -53,10 +56,8 @@ public class DevilFruitItem extends Item {
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         Identifier id = stack.getOrDefault(MyDataComponentTypes.DEVIL_FRUIT, DEFAULT_DEVIL_FRUIT);
-        if (world instanceof ServerWorld serverWorld) {
-            if (user instanceof IOnePiecePlayer player) {
-                player.onepiece$setDevilFruit(id.toString());
-            }
+        if (user instanceof IOnePiecePlayer player ) {
+            player.onepiece$setDevilFruit(id.toString());
         }
         return stack;
     }
