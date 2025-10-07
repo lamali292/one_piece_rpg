@@ -23,21 +23,53 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Mixin for {@link SpellHotbar} that restricts spell availability based on combat mode and learned spells.
+ * <p>
+ * This mixin overrides the hotbar update logic to only display spells when the player is in
+ * combat mode and has actually learned those spells. It filters out unlearned spells and
+ * organizes them based on their keybindings.
+ *
+ * @see SpellHotbar
+ * @see ICombatPlayer
+ * @see ISpellPlayer
+ */
 @Mixin(value = SpellHotbar.class)
 public abstract class SpellHotbarMixin {
 
-
+    /**
+     * Determines which item stack is expected to be used based on the player's current state.
+     *
+     * @param player the player entity
+     * @return the expected item use information, or {@code null}
+     */
     @Shadow
     public static SpellHotbar.ItemUseExpectation expectedUseStack(PlayerEntity player) {
         return null;
     }
 
+    /**
+     * Gets a typed reference to this mixin instance as a {@link SpellHotbar}.
+     *
+     * @return this instance cast to {@link SpellHotbar}
+     */
     @Unique
     private SpellHotbar onepiece$getSelf() {
         return (SpellHotbar) (Object) this;
     }
 
-
+    /**
+     * Updates the spell hotbar with combat mode restrictions and learned spell filtering.
+     * <p>
+     * This method completely replaces the default update behavior. It only populates the
+     * hotbar when the player is in combat mode, and filters the spell list to include
+     * only spells that the player has learned. Spells are organized into slots based on
+     * their keybindings, with special handling for spells bound to the use key.
+     *
+     * @param player the client player entity
+     * @param options the game options containing keybindings
+     * @param cir callback info returning whether the hotbar changed
+     */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     public void update(ClientPlayerEntity player, GameOptions options, CallbackInfoReturnable<Boolean> cir) {
         var changed = false;
@@ -50,8 +82,7 @@ public abstract class SpellHotbarMixin {
         var allBindings = Keybindings.Wrapped.all();
         var useKey = ((KeybindingAccessor) options.useKey).getBoundKey();
 
-        // block ALL spells when not in combat mode
-
+        // Block ALL spells when not in combat mode
         if (player instanceof ISpellPlayer iOnePiecePlayer && player instanceof ICombatPlayer iCombatPlayer &&  iCombatPlayer.onepiece$isCombatMode()) {
             List<RegistryEntry<Spell>> spells = iOnePiecePlayer.onepiece$getSelectedSpells();
             List<RegistryEntry<Spell>> learned = SpellUtil.getLearnedSpells(player);
@@ -62,7 +93,7 @@ public abstract class SpellHotbarMixin {
                 var spell = spellEntry.value();
                 if (spell == null) continue;
 
-                // skip spells that aren’t learned while in combat
+                // Skip spells that aren't learned while in combat
                 if (!learned.contains(spellEntry)) {
                     continue;
                 }

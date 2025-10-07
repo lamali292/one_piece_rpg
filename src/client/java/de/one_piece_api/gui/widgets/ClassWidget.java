@@ -14,54 +14,119 @@ import net.minecraft.util.math.MathHelper;
 import java.util.function.Consumer;
 
 /**
- * Widget representing a selectable character class in the UI.
- * Handles rendering and interaction for a single class option with smooth scaling.
+ * Widget representing a selectable character class in the class selection UI.
+ * <p>
+ * This widget provides an interactive visual representation of a character class
+ * with smooth animations and visual feedback. It features dynamic scaling on hover,
+ * grayscale filtering for non-hovered states, and proper layout positioning.
+ *
+ * <h2>Features:</h2>
+ * <ul>
+ *     <li>Smooth scale animation on hover (1.0x to 1.1x)</li>
+ *     <li>Grayscale effect for non-hovered classes when any class is hovered</li>
+ *     <li>Delta-time-based animation for consistent speed across framerates</li>
+ *     <li>Cached grayscale textures for performance</li>
+ *     <li>Relative positioning within container for flexible layouts</li>
+ *     <li>Click callback for class selection</li>
+ * </ul>
+ *
+ * <h2>Visual Components:</h2>
+ * <ul>
+ *     <li>Background texture - Main class image</li>
+ *     <li>Name badge - Class name overlay at bottom</li>
+ *     <li>Selection frame - "SELECT" indicator (always colored)</li>
+ * </ul>
+ *
+ * @see Drawable
+ * @see Element
+ * @see ClassConfig
  */
 public class ClassWidget implements Drawable, Element {
 
+    // ==================== Constants ====================
+
+    /** Texture for the selection rectangle frame */
     private static final Identifier SELECT_RECT = OnePieceRPG.id("textures/gui/class/select_rect.png");
+
+    /** Texture for the "SELECT" text overlay */
     private static final Identifier SELECT_TEXT = OnePieceRPG.id("textures/gui/class/select_text.png");
 
-    // Base dimensions at reference scale
+    // Base dimensions at reference scale (before scaling)
+    /** Base width of the class widget at 1.0 scale */
     private static final float BASE_WIDTH = 500;
+
+    /** Base height of the class widget at 1.0 scale */
     private static final float BASE_HEIGHT = 720;
+
+    /** Base dimension (width/height) of the name badge at 1.0 scale */
     private static final float BASE_NAME_DIM = 180;
+
+    /** Margin between name badge and bottom edge in pixels */
     private static final float NAME_BOTTOM_MARGIN = 10;
 
+    /** Width of the selection rectangle at 1.0 scale */
     private static final float SELECT_RECT_WIDTH = 313;
+
+    /** Height of the selection rectangle at 1.0 scale */
     private static final float SELECT_RECT_HEIGHT = 90;
+
+    /** Width of the "SELECT" text at 1.0 scale */
     private static final float SELECT_TEXT_WIDTH = 214;
+
+    /** Height of the "SELECT" text at 1.0 scale */
     private static final float SELECT_TEXT_HEIGHT = 35;
 
     // Animation constants
-    private static final float SCALE_SPEED = 0.2f; // Interpolation speed per second
+    /** Interpolation speed multiplier for scale animation */
+    private static final float SCALE_SPEED = 0.2f;
+
+    /** Target scale when widget is hovered */
     private static final float TARGET_SCALE_HOVERED = 1.1f;
+
+    /** Target scale when widget is not hovered */
     private static final float TARGET_SCALE_NORMAL = 1.0f;
 
-    // Immutable data
+    // ==================== Immutable Data ====================
+
+    /** The unique identifier for this character class */
     private final Identifier classId;
+
+    /** Configuration containing textures and metadata for this class */
     private final ClassConfig config;
+
+    /** Horizontal offset as fraction of container width (-1.0 to 1.0) */
     private final float relativeOffset;
+
+    /** Callback invoked when the widget is clicked */
     private final Consumer<Identifier> onClickCallback;
 
     // Layout state
+    /** Bounds calculator for positioning and hit detection */
     private final WidgetBounds bounds;
 
     // Rendering state
+    /** Whether the mouse is currently hovering over this widget */
     private boolean isHovered = false;
+
+    /** Whether any widget in the container is being hovered */
     private boolean anyHovered = false;
 
     // Animation state
+    /** Current scale value being rendered (interpolated) */
     private float currentScale = 1.0f;
+
+    /** Target scale value to animate towards */
     private float targetScale = 1.0f;
+
+    // ==================== Constructor ====================
 
     /**
      * Creates a new class widget.
      *
-     * @param classId The identifier for this class
-     * @param config Configuration containing textures and metadata
-     * @param relativeOffset Horizontal offset as fraction of container width (-1.0 to 1.0)
-     * @param onClickCallback Callback invoked when widget is clicked
+     * @param classId the unique identifier for this character class
+     * @param config configuration containing textures and metadata
+     * @param relativeOffset horizontal offset as fraction of container width (-1.0 to 1.0)
+     * @param onClickCallback callback invoked when widget is clicked
      */
     public ClassWidget(Identifier classId, ClassConfig config, float relativeOffset,
                        Consumer<Identifier> onClickCallback) {
@@ -72,31 +137,74 @@ public class ClassWidget implements Drawable, Element {
         this.bounds = new WidgetBounds();
     }
 
+    // ==================== Layout Management ====================
+
     /**
      * Updates the widget's scale factor and recalculates dimensions.
-     * Should be called when tab is resized.
+     * <p>
+     * This method should be called when the screen is resized or when
+     * the layout scale changes. It updates all dimension calculations
+     * but does not recalculate screen position (that happens per-frame).
      *
-     * @param scale The new scale factor
-     * @param containerWidth The width of the container to offset within
+     * @param scale the new scale factor to apply to base dimensions
+     * @param containerWidth the width of the container for relative positioning
      */
     public void updateLayout(float scale, int containerWidth) {
         this.bounds.update(scale, containerWidth, relativeOffset);
     }
 
+    // ==================== State Management ====================
+
     /**
-     * Sets whether this widget should be rendered in color or grayscale.
+     * Sets whether this widget is currently hovered.
+     * <p>
+     * When hovered, the widget renders in full color and scales up.
+     * When not hovered (but {@link #anyHovered} is true), it renders
+     * in grayscale at normal scale.
      *
-     * @param hovered true for color rendering, false for grayscale
+     * @param hovered {@code true} for color rendering and scale-up, {@code false} otherwise
      */
     public void setHovered(boolean hovered) {
         this.isHovered = hovered;
         this.targetScale = hovered ? TARGET_SCALE_HOVERED : TARGET_SCALE_NORMAL;
     }
 
+    /**
+     * Sets whether any widget in the container is being hovered.
+     * <p>
+     * This is used to determine when to apply grayscale filtering.
+     * When {@code true}, non-hovered widgets render in grayscale.
+     * When {@code false}, all widgets render in color.
+     *
+     * @param anyHovered {@code true} if any widget is hovered, {@code false} otherwise
+     */
     public void setAnyHovered(boolean anyHovered) {
         this.anyHovered = anyHovered;
     }
 
+    // ==================== Rendering ====================
+
+    /**
+     * Renders the class widget with smooth animations and visual effects.
+     * <p>
+     * Rendering pipeline:
+     * <ol>
+     *     <li>Update screen position based on current window size</li>
+     *     <li>Animate scale towards target using delta-time interpolation</li>
+     *     <li>Calculate scaled dimensions and offsets</li>
+     *     <li>Render background (grayscale or color based on hover state)</li>
+     *     <li>Render name badge at bottom</li>
+     *     <li>Render selection frame and text (always colored)</li>
+     * </ol>
+     *
+     * Animation uses exponential interpolation with delta time for smooth,
+     * frame-rate-independent scaling.
+     *
+     * @param context the drawing context
+     * @param mouseX the mouse x-coordinate
+     * @param mouseY the mouse y-coordinate
+     * @param delta the frame delta time in seconds
+     */
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         bounds.updateScreenPosition();
@@ -191,6 +299,19 @@ public class ClassWidget implements Drawable, Element {
         RenderSystem.disableBlend();
     }
 
+    // ==================== Input Handling ====================
+
+    /**
+     * Handles mouse click events.
+     * <p>
+     * When the widget is left-clicked, invokes the callback with this
+     * widget's class ID.
+     *
+     * @param mouseX the mouse x-coordinate
+     * @param mouseY the mouse y-coordinate
+     * @param button the mouse button (0=left, 1=right, 2=middle)
+     * @return {@code true} if the click was handled, {@code false} otherwise
+     */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && isMouseOver(mouseX, mouseY)) {
@@ -200,39 +321,97 @@ public class ClassWidget implements Drawable, Element {
         return false;
     }
 
+    /**
+     * Checks if the mouse is over this widget.
+     *
+     * @param mouseX the mouse x-coordinate
+     * @param mouseY the mouse y-coordinate
+     * @return {@code true} if mouse is within widget bounds, {@code false} otherwise
+     */
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return bounds.contains(mouseX, mouseY);
     }
 
+    // ==================== Element Interface ====================
+
+    /**
+     * Sets focus state for this widget.
+     * <p>
+     * This widget is not focusable via keyboard, so this method does nothing.
+     *
+     * @param focused the focus state (ignored)
+     */
     @Override
     public void setFocused(boolean focused) {
         // Not focusable via keyboard
     }
 
+    /**
+     * Checks if this widget has focus.
+     * <p>
+     * This widget is not focusable via keyboard.
+     *
+     * @return {@code false} always
+     */
     @Override
     public boolean isFocused() {
         return false;
     }
 
+    // ==================== Getters ====================
+
+    /**
+     * Gets the class identifier for this widget.
+     *
+     * @return the class identifier
+     */
     public Identifier getClassId() {
         return classId;
     }
 
+    // ==================== Inner Classes ====================
+
     /**
      * Internal class to encapsulate widget positioning and dimensions.
-     * Reduces duplication and makes layout calculations explicit.
+     * <p>
+     * This class handles all layout calculations including scaling, relative
+     * positioning within the container, and screen-space coordinate conversion.
+     * Separating this logic reduces duplication and makes layout calculations
+     * more explicit and testable.
      */
     private static class WidgetBounds {
+        /** Current x-coordinate in screen space */
         float x, y;
+
+        /** Current width and height after scaling */
         float width, height;
+
+        /** Current dimension of the name badge after scaling */
         float nameDim;
+
+        /** Current dimensions of the selection text after scaling */
         float selectTextWidth, selectTextHeight;
+
+        /** Current dimensions of the selection rectangle after scaling */
         float selectRectWidth, selectRectHeight;
 
+        /** Container width for relative positioning */
         private int containerWidth;
+
+        /** Horizontal offset as fraction of container width */
         private float relativeOffset;
 
+        /**
+         * Updates the scaled dimensions based on new scale and container size.
+         * <p>
+         * Applies the scale factor to all base dimensions and stores the
+         * container parameters for later position calculation.
+         *
+         * @param scale the scale factor to apply
+         * @param containerWidth the container width for relative positioning
+         * @param relativeOffset the relative horizontal offset (-1.0 to 1.0)
+         */
         void update(float scale, int containerWidth, float relativeOffset) {
             this.width = (scale * BASE_WIDTH);
             this.height = (scale * BASE_HEIGHT);
@@ -245,6 +424,13 @@ public class ClassWidget implements Drawable, Element {
             this.relativeOffset = relativeOffset;
         }
 
+        /**
+         * Updates the screen-space position based on current window size.
+         * <p>
+         * Calculates centered position with horizontal offset based on
+         * the relative offset parameter. Should be called each frame to
+         * handle window resizing.
+         */
         void updateScreenPosition() {
             MinecraftClient client = MinecraftClient.getInstance();
             int screenWidth = client.getWindow().getScaledWidth();
@@ -255,6 +441,13 @@ public class ClassWidget implements Drawable, Element {
             this.y = ((screenHeight - height) / 2);
         }
 
+        /**
+         * Checks if a point is within the widget bounds.
+         *
+         * @param mouseX the x-coordinate to check
+         * @param mouseY the y-coordinate to check
+         * @return {@code true} if the point is within bounds, {@code false} otherwise
+         */
         boolean contains(double mouseX, double mouseY) {
             return mouseX >= x && mouseX < x + width
                     && mouseY >= y && mouseY < y + height;
