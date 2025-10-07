@@ -12,9 +12,28 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.lang.reflect.Field;
 
+/**
+ * Mixin for {@link SkillsClientMod} that provides access to internal data and modifies keybinding registration.
+ * <p>
+ * This mixin implements {@link ISkillsClientMod} to expose the client skill screen data and
+ * redirects keybinding registration to prevent default keybindings from being registered.
+ *
+ * @see SkillsClientMod
+ * @see ISkillsClientMod
+ */
 @Mixin(SkillsClientMod.class)
 public class SkillsClientModMixin implements ISkillsClientMod {
 
+    /**
+     * Retrieves the client skill screen data using reflection.
+     * <p>
+     * This method uses reflection to access the private {@link ClientSkillScreenData} field
+     * in {@link SkillsClientMod}, working regardless of the field's name by searching for
+     * the field by its type.
+     *
+     * @return the {@link ClientSkillScreenData} instance from the skills client mod
+     * @throws RuntimeException if the field cannot be found or accessed
+     */
     @Override
     public ClientSkillScreenData onepiece$getScreenData() {
         try {
@@ -31,11 +50,21 @@ public class SkillsClientModMixin implements ISkillsClientMod {
         }
     }
 
+    /**
+     * Prevents default keybinding registration for the skills screen.
+     * <p>
+     * This redirect intercepts the keybinding registration call during setup and
+     * prevents it from executing, allowing custom keybinding handling to take over.
+     *
+     * @param receiver the keybinding receiver that would register the binding
+     * @param keyBinding the keybinding to register
+     * @param action the handler for the keybinding action
+     */
     @Redirect(
             method = "setup(Lnet/puffish/skillsmod/client/setup/ClientRegistrar;Lnet/puffish/skillsmod/client/event/ClientEventReceiver;Lnet/puffish/skillsmod/client/keybinding/KeyBindingReceiver;Lnet/puffish/skillsmod/client/network/ClientPacketSender;)V",
             at = @At(value = "INVOKE", target = "Lnet/puffish/skillsmod/client/keybinding/KeyBindingReceiver;registerKeyBinding(Lnet/minecraft/client/option/KeyBinding;Lnet/puffish/skillsmod/client/keybinding/KeyBindingHandler;)V")
     )
     private static void redirectKeyBindingRegistration(KeyBindingReceiver receiver, KeyBinding keyBinding, KeyBindingHandler action) {
-        // Do nothing
+        // Do nothing - prevents default keybinding registration
     }
 }

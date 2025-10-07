@@ -11,22 +11,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages the spell slot widgets and their layout.
- * Layout is only calculated when needed, not every frame.
+ * Manages spell slot widgets and their layout positioning.
+ * <p>
+ * This manager handles the creation, positioning, and data updates for all spell slot
+ * widgets displayed in the skill tree screen. It employs lazy layout calculation to
+ * minimize performance impact by only recalculating positions when necessary.
+ *
+ * <h2>Layout Strategy:</h2>
+ * <ul>
+ *     <li>Distributes N-1 slots evenly across available width</li>
+ *     <li>Positions the last slot at the right edge for visual balance</li>
+ *     <li>Caches layout parameters to avoid unnecessary recalculations</li>
+ *     <li>Updates spell data independently of layout changes</li>
+ * </ul>
+ *
+ * @see SpellSlotWidget
+ * @see SpellManager
  */
 public class SpellSlotManager {
 
+    /** List of managed spell slot widgets */
     private final List<SpellSlotWidget> slots = new ArrayList<>();
+
+    /** Spell manager for handling spell operations */
     private final SpellManager spellManager;
+
+    /** Dimension of each spell slot rectangle in pixels */
     private final int rectDim;
+
+    /** Total number of spell slots to display */
     private final int spellSlotCount;
 
     // Track layout state to avoid unnecessary recalculation
+    /** Whether the layout has been initialized */
     private boolean layoutInitialized = false;
+
+    /** Last base X position used for layout calculation */
     private int lastBaseX = -1;
+
+    /** Last base Y position used for layout calculation */
     private int lastBaseY = -1;
+
+    /** Last skill tree width used for layout calculation */
     private int lastSkillTreeWidth = -1;
 
+    /**
+     * Creates a new spell slot manager.
+     *
+     * @param player the client player entity
+     * @param rectDim the dimension of each spell slot rectangle in pixels
+     * @param skilltreeWidth the width of the skill tree area
+     */
     public SpellSlotManager(ClientPlayerEntity player, int rectDim, int skilltreeWidth) {
         this.spellManager = new SpellManager(player);
         this.spellSlotCount = OnePieceRPG.getSpellSlots(player);
@@ -34,8 +69,15 @@ public class SpellSlotManager {
     }
 
     /**
-     * Updates the positions of all spell slots if the layout has changed.
-     * Only recalculates when baseX, baseY, or skilltreeWidth differ from last call.
+     * Updates the positions of all spell slots if the layout parameters have changed.
+     * <p>
+     * This method uses caching to avoid unnecessary recalculations. Layout is only
+     * rebuilt when baseX, baseY, or skilltreeWidth differ from the last call.
+     * This optimization significantly reduces CPU usage during rendering.
+     *
+     * @param baseX the left edge x-coordinate for slot positioning
+     * @param baseY the top edge y-coordinate for slot positioning
+     * @param skilltreeWidth the total width available for slot distribution
      */
     public void updateLayoutIfNeeded(int baseX, int baseY, int skilltreeWidth) {
         // Check if layout needs updating
@@ -58,7 +100,13 @@ public class SpellSlotManager {
 
     /**
      * Forces a layout rebuild regardless of cached values.
-     * Useful after screen resize or significant UI changes.
+     * <p>
+     * This method is useful after screen resize or significant UI changes when
+     * the layout must be recalculated even if the parameters appear unchanged.
+     *
+     * @param baseX the left edge x-coordinate for slot positioning
+     * @param baseY the top edge y-coordinate for slot positioning
+     * @param skilltreeWidth the total width available for slot distribution
      */
     public void forceLayoutUpdate(int baseX, int baseY, int skilltreeWidth) {
         lastBaseX = baseX;
@@ -69,7 +117,18 @@ public class SpellSlotManager {
     }
 
     /**
-     * Internal method that performs the actual layout calculation.
+     * Performs the actual layout calculation and widget creation.
+     * <p>
+     * This method implements a custom spacing algorithm:
+     * <ol>
+     *     <li>Calculates even spacing between the first N-1 slots</li>
+     *     <li>Positions the last slot flush against the right edge</li>
+     * </ol>
+     * This creates a visually balanced layout with clear boundaries.
+     *
+     * @param baseX the left edge x-coordinate for slot positioning
+     * @param baseY the top edge y-coordinate for slot positioning
+     * @param skilltreeWidth the total width available for slot distribution
      */
     private void rebuildLayout(int baseX, int baseY, int skilltreeWidth) {
         slots.clear();
@@ -93,8 +152,12 @@ public class SpellSlotManager {
     }
 
     /**
-     * Updates spell data for all slots.
-     * This should be called when spells change, not every frame.
+     * Updates spell data for all slots from the spell manager.
+     * <p>
+     * This method synchronizes the displayed spell data with the current player
+     * spell selection. It should be called when spells change, not every frame.
+     * Each slot is updated with its corresponding spell and whether that spell
+     * has been learned by the player.
      */
     public void updateSpellData() {
         List<RegistryEntry<Spell>> playerSpells = spellManager.getPlayerSpells();
@@ -114,7 +177,12 @@ public class SpellSlotManager {
     }
 
     /**
-     * Sets up event handlers for a spell slot.
+     * Sets up event handlers for a spell slot widget.
+     * <p>
+     * Configures left-click (for spell selection) and right-click (for spell
+     * removal) handlers for the given slot.
+     *
+     * @param slot the slot widget to configure
      */
     private void setupSlotHandlers(SpellSlotWidget slot) {
         slot.setOnLeftClick(s -> onSlotLeftClick(s.getSlotIndex()));
@@ -122,30 +190,53 @@ public class SpellSlotManager {
     }
 
     /**
-     * Called when a slot is left-clicked (open selection).
+     * Handles left-click events on spell slots.
+     * <p>
+     * Left-clicking a slot is intended to open the spell selection overlay.
+     * This is handled by the parent screen, so this method serves as a hook point.
+     *
+     * @param slotIndex the index of the clicked slot
      */
     private void onSlotLeftClick(int slotIndex) {
         // Handled by the screen to show overlay
     }
 
     /**
-     * Called when a slot is right-clicked (remove spell).
+     * Handles right-click events on spell slots.
+     * <p>
+     * Right-clicking a slot removes the spell from that slot and updates
+     * the display to reflect the change.
+     *
+     * @param slotIndex the index of the clicked slot
      */
     private void onSlotRightClick(int slotIndex) {
         spellManager.removeSpellFromSlot(slotIndex);
         updateSpellData();
     }
 
+    /**
+     * Gets the list of all spell slot widgets.
+     *
+     * @return an immutable view of the slot widget list
+     */
     public List<SpellSlotWidget> getSlots() {
         return slots;
     }
 
+    /**
+     * Gets the spell manager instance.
+     *
+     * @return the spell manager handling spell operations
+     */
     public SpellManager getSpellManager() {
         return spellManager;
     }
 
     /**
-     * Gets the position of a specific slot.
+     * Gets the position of a specific spell slot.
+     *
+     * @param index the index of the slot (0-based)
+     * @return the position vector of the slot, or (0,0) if index is invalid
      */
     public Vector2i getSlotPosition(int index) {
         if (index >= 0 && index < slots.size()) {
@@ -155,8 +246,10 @@ public class SpellSlotManager {
     }
 
     /**
-     * Invalidates the layout cache, forcing a rebuild on next update.
-     * Call this when screen is resized.
+     * Invalidates the layout cache, forcing a rebuild on the next update.
+     * <p>
+     * Call this method when the screen is resized or when layout parameters
+     * may have changed in a way that bypasses normal change detection.
      */
     public void invalidateLayout() {
         layoutInitialized = false;

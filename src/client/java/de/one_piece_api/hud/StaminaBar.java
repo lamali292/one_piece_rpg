@@ -6,18 +6,44 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
 
+/**
+ * Renders a stamina bar HUD element for the player.
+ * <p>
+ * The stamina bar is displayed above the hotbar and shows the current stamina
+ * relative to the maximum stamina value from the player's attributes.
+ */
 public class StaminaBar {
-    // Bar dimensions and position
+    /** Width of the stamina bar in pixels */
     private static final int BAR_WIDTH = 182;
+
+    /** Height of the stamina bar in pixels */
     private static final int BAR_HEIGHT = 5;
-    private static final int BAR_X_OFFSET = 0; // Center of screen
-    private static final int BAR_Y_OFFSET = -40; // Above hotbar
 
-    // Colors (ARGB format)
-    private static final int BACKGROUND_COLOR = 0x80000000; // Semi-transparent black
-    private static final int STAMINA_COLOR = 0xFF00FFFF;    // Cyan
-    private static final int BORDER_COLOR = 0xFF555555;     // Gray
+    /** Horizontal offset from the center of the screen */
+    private static final int BAR_X_OFFSET = 0;
 
+    /** Vertical offset from the bottom of the screen (negative = above hotbar) */
+    private static final int BAR_Y_OFFSET = -40;
+
+    /** Background color of the bar (ARGB format - semi-transparent black) */
+    private static final int BACKGROUND_COLOR = 0x80000000;
+
+    /** Fill color for the stamina amount (ARGB format - cyan) */
+    private static final int STAMINA_COLOR = 0xFF00FFFF;
+
+    /** Border color around the bar (ARGB format - gray) */
+    private static final int BORDER_COLOR = 0xFF555555;
+
+    /**
+     * Renders the stamina bar on the screen.
+     * <p>
+     * This method should be called during the HUD render phase. It displays a horizontal
+     * bar centered above the hotbar showing the player's current stamina out of their
+     * maximum stamina.
+     *
+     * @param context the drawing context used for rendering
+     * @param tickCounter the render tick counter for animation timing
+     */
     public static void render(DrawContext context, RenderTickCounter tickCounter) {
         var client = MinecraftClient.getInstance();
         var player = client.player;

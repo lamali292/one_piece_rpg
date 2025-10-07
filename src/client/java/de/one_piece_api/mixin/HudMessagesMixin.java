@@ -10,8 +10,28 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Mixin for {@link HudMessages} that adds custom error handling for stamina-related spell cast failures.
+ * <p>
+ * This mixin intercepts cast attempt errors and provides a custom localized message
+ * when a spell fails due to insufficient stamina.
+ *
+ * @see HudMessages
+ * @see SpellCast.Attempt
+ */
 @Mixin(value = HudMessages.class, remap = false)
 public class HudMessagesMixin {
+
+    /**
+     * Handles stamina-specific error messages when spell casting fails.
+     * <p>
+     * When a spell cast attempt fails due to insufficient stamina, this method
+     * intercepts the default error handling and displays a custom aqua-colored
+     * localized message instead.
+     *
+     * @param attempt the spell cast attempt containing the failure reason
+     * @param ci callback info from the mixin injection, used to cancel default behavior
+     */
     @Inject(method = "castAttemptError", at = @At("HEAD"), cancellable = true)
     private void handleStaminaError(SpellCast.Attempt attempt, CallbackInfo ci) {
         if (attempt.result().toString().equals("INSUFFICIENT_STAMINA")) {

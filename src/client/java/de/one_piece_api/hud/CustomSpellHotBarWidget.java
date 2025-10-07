@@ -16,22 +16,48 @@ import net.spell_engine.client.gui.HudKeyVisuals;
 import net.spell_engine.client.gui.HudRenderHelper;
 import net.spell_engine.client.util.TextureFile;
 
-// net.spell_engine.client.gui.HudRenderHelper
+/**
+ * Custom spell hotbar widget that displays spell icons with combat mode animation.
+ * <p>
+ * This widget renders two hotbars on either side of the screen that smoothly fade in
+ * when the player enters combat mode. Each slot displays spell icons, cooldowns,
+ * stamina costs, and keybindings.
+ */
 public class CustomSpellHotBarWidget {
+    /** Texture file for the hotbar background */
     private static final TextureFile HOTBAR = new TextureFile(Identifier.of("textures/gui/sprites/hud/hotbar.png"), 182, 22);
+
+    /** Height of each hotbar slot in pixels */
     private static final int slotHeight = 22;
+
+    /** Width of each hotbar slot in pixels */
     private static final int slotWidth = 20;
 
-    private static float combatModeAlpha = 0f; // 0 = hidden, 1 = fully visible
+    /** Current alpha value for combat mode fade animation (0 = hidden, 1 = fully visible) */
+    private static float combatModeAlpha = 0f;
+
+    /** Speed at which the hotbar fades in/out per frame */
     private static final float ANIMATION_SPEED = 0.1f;
 
+    /**
+     * Renders the custom spell hotbar with combat mode animation.
+     * <p>
+     * The hotbar is split into two sections (left and right) that appear on either
+     * side of the screen. It smoothly fades in when combat mode is active and fades
+     * out when combat mode is inactive.
+     *
+     * @param context the drawing context used for rendering
+     * @param screenWidth the width of the screen in pixels
+     * @param screenHeight the height of the screen in pixels
+     * @param viewModel the view model containing spell data to display
+     */
     public static void render(DrawContext context, int screenWidth, int screenHeight, HudRenderHelper.SpellHotBarWidget.ViewModel viewModel) {
 
         MinecraftClient client = MinecraftClient.getInstance();
 
         boolean combat = client.player instanceof ICombatPlayer iCombatPlayer && iCombatPlayer.onepiece$isCombatMode();
 
-// Smoothly interpolate alpha
+        // Smoothly interpolate alpha
         if (combat) {
             combatModeAlpha += ANIMATION_SPEED;
         } else {
@@ -39,7 +65,7 @@ public class CustomSpellHotBarWidget {
         }
         combatModeAlpha = MathHelper.clamp(combatModeAlpha, 0f, 1f);
 
-// Skip rendering if fully invisible
+        // Skip rendering if fully invisible
         if (combatModeAlpha <= 0f) return;
 
         var textRenderer = client.inGameHud.getTextRenderer();
@@ -74,6 +100,19 @@ public class CustomSpellHotBarWidget {
         context.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
+    /**
+     * Draws spell icons with their associated visual elements.
+     * <p>
+     * For each spell slot, this renders the icon, cooldown overlay, stamina cost indicator,
+     * and keybinding display.
+     *
+     * @param context the drawing context
+     * @param viewModel the view model containing spell data
+     * @param count number of slots to render
+     * @param offset starting index in the spell list
+     * @param origin top-left corner position of the hotbar
+     * @param textRenderer text renderer for keybindings
+     */
     private static void drawIcons(DrawContext context, HudRenderHelper.SpellHotBarWidget.ViewModel viewModel, int count, int offset, Vec2f origin, TextRenderer textRenderer) {
         context.setShaderColor(1.0f, 1.0f, 1.0f, 1.0F);
         var iconsOffset = new Vec2f(3, 3);
@@ -124,7 +163,17 @@ public class CustomSpellHotBarWidget {
         }
     }
 
-
+    /**
+     * Draws the hotbar background texture.
+     * <p>
+     * Renders a flexible-width hotbar by drawing the left edge, middle sections,
+     * and right edge separately to accommodate any number of slots.
+     *
+     * @param context the drawing context
+     * @param barOpacity opacity of the bar (0-1)
+     * @param origin top-left corner position
+     * @param count number of slots to draw
+     */
     private static void drawBackground(DrawContext context, float barOpacity, Vec2f origin, int count) {
         context.setShaderColor(1.0f, 1.0f, 1.0f, barOpacity);
         context.drawTexture(HOTBAR.id(), (int) (origin.x), (int) (origin.y), 0, 0, slotWidth / 2, slotHeight, HOTBAR.width(), HOTBAR.height());
@@ -135,6 +184,16 @@ public class CustomSpellHotBarWidget {
         context.drawTexture(HOTBAR.id(), (int) (origin.x) + (slotWidth / 2) + (middleElements * slotWidth), (int) (origin.y), 170, 0, (slotHeight / 2) + 1, slotHeight, HOTBAR.width(), HOTBAR.height());
     }
 
+    /**
+     * Draws a keybinding label with decorative button visuals.
+     *
+     * @param context the drawing context
+     * @param textRenderer text renderer for the label
+     * @param keybinding the keybinding view model containing label and drawable
+     * @param x horizontal position
+     * @param y vertical position
+     * @param horizontalAnchor anchor point for horizontal alignment
+     */
     private static void drawKeybinding(DrawContext context, TextRenderer textRenderer, HudRenderHelper.SpellHotBarWidget.KeyBindingViewModel keybinding, int x, int y,
                                        Drawable.Anchor horizontalAnchor) {
         if (keybinding.drawable() != null) {
@@ -154,6 +213,17 @@ public class CustomSpellHotBarWidget {
         }
     }
 
+    /**
+     * Renders a cooldown overlay on a spell icon.
+     * <p>
+     * Displays a semi-transparent overlay that fills from bottom to top
+     * based on the cooldown progress.
+     *
+     * @param context the drawing context
+     * @param progress cooldown progress (0 = ready, 1 = on cooldown)
+     * @param x icon x position
+     * @param y icon y position
+     */
     private static void renderCooldown(DrawContext context, float progress, int x, int y) {
         if (progress <= 0) return;
 
@@ -168,6 +238,22 @@ public class CustomSpellHotBarWidget {
         RenderSystem.defaultBlendFunc();
     }
 
+    /**
+     * Renders a stamina cost indicator as a vertical bar next to the spell icon.
+     * <p>
+     * The bar color indicates whether the player has enough stamina:
+     * <ul>
+     *     <li>Green: Sufficient stamina (100%+)</li>
+     *     <li>Yellow: Moderate stamina (50-99%)</li>
+     *     <li>Orange: Low stamina (1-49%)</li>
+     *     <li>Red: Insufficient stamina (0%)</li>
+     * </ul>
+     *
+     * @param context the drawing context
+     * @param requiredStamina stamina cost of the spell
+     * @param x icon x position
+     * @param y icon y position
+     */
     private static void renderStamina(DrawContext context, float requiredStamina, int x, int y) {
         if (requiredStamina <= 0) return;
 

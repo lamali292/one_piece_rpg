@@ -11,9 +11,28 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * Mixin for {@link ShowCategoryInPacket} that extends packet deserialization to include custom data.
+ * <p>
+ * This mixin injects additional data reading for skill connections and skills, allowing
+ * custom style identifiers and hidden states to be transmitted over the network.
+ *
+ * @see ShowCategoryInPacket
+ * @see StyledConnection
+ * @see IHidden
+ */
 @Mixin(ShowCategoryInPacket.class)
 public class ShowCategoryInPacketMixin {
 
+    /**
+     * Reads custom style data for skill connections from the packet buffer.
+     * <p>
+     * After the default skill connection is deserialized, this method checks if
+     * a custom style identifier is present in the packet and applies it to the connection.
+     *
+     * @param buf the packet buffer containing serialized data
+     * @param cir callback info returning the deserialized {@link ClientSkillConnectionConfig}
+     */
     @Inject(
             method = "readSkillConnection",
             at = @At("RETURN"),
@@ -28,7 +47,15 @@ public class ShowCategoryInPacketMixin {
         }
     }
 
-
+    /**
+     * Reads custom hidden state for skills from the packet buffer.
+     * <p>
+     * After the default skill is deserialized, this method reads the hidden state
+     * flag from the packet and applies it to the skill configuration.
+     *
+     * @param buf the packet buffer containing serialized data
+     * @param cir callback info returning the deserialized {@link ClientSkillConfig}
+     */
     @Inject(
             method = "readSkill",
             at = @At("RETURN"),

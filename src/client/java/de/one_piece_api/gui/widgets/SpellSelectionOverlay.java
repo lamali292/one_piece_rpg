@@ -2,12 +2,10 @@ package de.one_piece_api.gui.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.one_piece_api.OnePieceRPG;
-import de.one_piece_api.gui.OnePieceScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -21,66 +19,131 @@ import java.util.function.BiConsumer;
 
 /**
  * Modern overlay widget for spell selection with visual polish.
+ * <p>
+ * This overlay provides an elegant interface for selecting spells to assign to
+ * spell slots. It features smooth animations, hover effects, and a centered grid
+ * layout that adapts to the number of available spells.
  *
- * Features:
- * - Semi-transparent dark background overlay
- * - Animated fade-in effect
- * - Hover highlighting for spell icons
- * - Smooth grid layout with proper spacing
- * - Click outside to cancel
- * - Centered on screen
+ * <h2>Features:</h2>
+ * <ul>
+ *     <li>Semi-transparent dark background overlay</li>
+ *     <li>Animated fade-in effect for smooth appearance</li>
+ *     <li>Hover highlighting for spell icons</li>
+ *     <li>Smooth grid layout with proper spacing</li>
+ *     <li>Click outside to cancel selection</li>
+ *     <li>Centered on screen for accessibility</li>
+ *     <li>Empty state handling with message</li>
+ * </ul>
  *
- * Thread Safety: Not thread-safe. Should only be accessed from the render thread.
+ * <h2>User Interaction:</h2>
+ * <ul>
+ *     <li>Click on a spell icon to select it</li>
+ *     <li>Click outside the panel to cancel</li>
+ *     <li>Hover over icons for visual feedback</li>
+ * </ul>
+ *
+ * <h2>Thread Safety:</h2>
+ * Not thread-safe. Should only be accessed from the render thread.
+ *
+ * @see Drawable
+ * @see Element
+ * @see Spell
  */
 public class SpellSelectionOverlay implements Drawable, Element {
 
     // ==================== Constants ====================
 
-    private static final int COLUMNS = 8; // Reduced for better visual balance
-    private static final int ICON_SIZE = 24; // Larger for better visibility
+    /** Number of spell icons per row in the grid */
+    private static final int COLUMNS = 8;
+
+    /** Size of each spell icon in pixels */
+    private static final int ICON_SIZE = 24;
+
+    /** Spacing between icons in pixels */
     private static final int ICON_PADDING = 4;
+
+    /** Padding around the panel content in pixels */
     private static final int PANEL_PADDING = 16;
+
+    /** Height reserved for the title in pixels */
     private static final int TITLE_HEIGHT = 20;
 
     // Colors (ARGB format)
-    private static final int BACKGROUND_OVERLAY = 0xC0000000; // Semi-transparent black
-    private static final int PANEL_BACKGROUND = 0xE0202020;   // Dark gray panel
-    private static final int PANEL_BORDER = 0xFF4A4A4A;       // Light gray border
-    private static final int HOVER_HIGHLIGHT = 0x80FFFFFF;    // Semi-transparent white
-    private static final int TITLE_COLOR = 0xFFFFFFFF;        // White
+    /** Semi-transparent black for full-screen overlay */
+    private static final int BACKGROUND_OVERLAY = 0xC0000000;
+
+    /** Dark gray for panel background */
+    private static final int PANEL_BACKGROUND = 0xE0202020;
+
+    /** Light gray for panel border */
+    private static final int PANEL_BORDER = 0xFF4A4A4A;
+
+    /** Semi-transparent white for hover highlight */
+    private static final int HOVER_HIGHLIGHT = 0x80FFFFFF;
+
+    /** White for title text */
+    private static final int TITLE_COLOR = 0xFFFFFFFF;
 
     // Animation
-    private static final float FADE_IN_DURATION = 0.15f; // seconds
+    /** Duration of fade-in animation in seconds */
+    private static final float FADE_IN_DURATION = 0.15f;
 
     // ==================== Immutable State ====================
 
+    /** The spell slot index where the selected spell will be assigned */
     private final int targetSlotIndex;
+
+    /** List of spells available for selection */
     private final List<RegistryEntry<Spell>> availableSpells;
+
+    /** Callback invoked when a spell is selected */
     private final BiConsumer<Integer, RegistryEntry<Spell>> onSpellSelected;
+
+    /** Callback invoked when selection is cancelled */
     private final Runnable onCancel;
 
     // ==================== Mutable State ====================
 
+    /** X-coordinate of the panel's left edge */
     private int panelX;
+
+    /** Y-coordinate of the panel's top edge */
     private int panelY;
+
+    /** Width of the panel in pixels */
     private int panelWidth;
+
+    /** Height of the panel in pixels */
     private int panelHeight;
+
+    /** X-coordinate where the spell grid begins */
     private int gridStartX;
+
+    /** Y-coordinate where the spell grid begins */
     private int gridStartY;
+
+    /** Number of rows in the spell grid */
     private int rows;
 
-    private long openTime;
+    /** Timestamp when the overlay was opened (for animation) */
+    private final long openTime;
+
+    /** Current fade animation alpha value (0.0 to 1.0) */
     private float fadeAlpha = 0f;
 
     // ==================== Constructor ====================
 
     /**
      * Creates a new spell selection overlay.
+     * <p>
+     * Initializes the overlay with the target slot and available spells,
+     * calculates the layout to center it on screen, and starts the fade-in animation.
      *
-     * @param targetSlotIndex The slot index to assign the selected spell to
-     * @param availableSpells List of spells the player can choose from
-     * @param onSpellSelected Callback when a spell is selected
-     * @param onCancel Callback when selection is cancelled
+     * @param targetSlotIndex the slot index to assign the selected spell to
+     * @param availableSpells list of spells the player can choose from
+     * @param onSpellSelected callback invoked when a spell is selected (slot index, spell)
+     * @param onCancel callback invoked when selection is cancelled
+     * @throws NullPointerException if availableSpells, onSpellSelected, or onCancel is null
      */
     public SpellSelectionOverlay(int targetSlotIndex,
                                  List<RegistryEntry<Spell>> availableSpells,
@@ -99,6 +162,10 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     /**
      * Calculates the layout dimensions and positions for the overlay.
+     * <p>
+     * Determines the panel size based on the number of spells, arranging
+     * them in a grid with {@link #COLUMNS} per row. Centers the panel on
+     * the screen and calculates the starting position for the spell grid.
      */
     private void calculateLayout() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -134,6 +201,24 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     // ==================== Rendering ====================
 
+    /**
+     * Renders the spell selection overlay.
+     * <p>
+     * Rendering order:
+     * <ol>
+     *     <li>Full-screen semi-transparent background overlay</li>
+     *     <li>Panel background with border</li>
+     *     <li>Title text centered at top</li>
+     *     <li>Spell grid or empty state message</li>
+     * </ol>
+     * All elements respect the fade-in animation alpha value.
+     *
+     * @param context the drawing context
+     * @param mouseX the mouse x-coordinate
+     * @param mouseY the mouse y-coordinate
+     * @param delta the frame delta time
+     * @throws NullPointerException if context is null
+     */
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Objects.requireNonNull(context, "DrawContext cannot be null");
@@ -154,7 +239,12 @@ public class SpellSelectionOverlay implements Drawable, Element {
     }
 
     /**
-     * Updates the fade-in animation.
+     * Updates the fade-in animation based on elapsed time.
+     * <p>
+     * Calculates the current alpha value by interpolating from 0 to 1
+     * over {@link #FADE_IN_DURATION} seconds.
+     *
+     * @param delta the frame delta time (unused, animation is time-based)
      */
     private void updateAnimation(float delta) {
         float elapsed = (System.currentTimeMillis() - openTime) / 1000f;
@@ -163,6 +253,11 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     /**
      * Renders the semi-transparent background overlay.
+     * <p>
+     * Fills the entire screen with a dark overlay to dim the content behind
+     * the spell selection panel. Alpha is animated during fade-in.
+     *
+     * @param context the drawing context
      */
     private void renderBackgroundOverlay(DrawContext context) {
         int alpha = (int) (fadeAlpha * ((BACKGROUND_OVERLAY >> 24) & 0xFF));
@@ -173,6 +268,11 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     /**
      * Renders the main panel with border.
+     * <p>
+     * Draws a bordered rectangle containing the spell selection interface.
+     * Both border and background colors are animated during fade-in.
+     *
+     * @param context the drawing context
      */
     private void renderPanel(DrawContext context) {
         // Scale alpha for fade-in
@@ -190,7 +290,12 @@ public class SpellSelectionOverlay implements Drawable, Element {
     }
 
     /**
-     * Renders the title text.
+     * Renders the title text at the top of the panel.
+     * <p>
+     * Displays "Select Spell" centered horizontally within the panel.
+     * Text alpha is animated during fade-in.
+     *
+     * @param context the drawing context
      */
     private void renderTitle(DrawContext context) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -206,7 +311,14 @@ public class SpellSelectionOverlay implements Drawable, Element {
     }
 
     /**
-     * Renders the grid of spell icons.
+     * Renders the grid of spell icons or empty state message.
+     * <p>
+     * If spells are available, renders them in a grid layout with hover
+     * effects. If no spells are available, displays a centered message.
+     *
+     * @param context the drawing context
+     * @param mouseX the mouse x-coordinate
+     * @param mouseY the mouse y-coordinate
      */
     private void renderSpellGrid(DrawContext context, int mouseX, int mouseY) {
         if (availableSpells.isEmpty()) {
@@ -232,6 +344,15 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     /**
      * Renders a single spell icon with optional hover effect.
+     * <p>
+     * Draws a semi-transparent highlight behind hovered icons for visual
+     * feedback. Icon opacity respects the fade-in animation.
+     *
+     * @param context the drawing context
+     * @param spell the spell to render
+     * @param x the icon x-coordinate
+     * @param y the icon y-coordinate
+     * @param hovered whether the mouse is hovering over this icon
      */
     private void renderSpellIcon(DrawContext context, RegistryEntry<Spell> spell, int x, int y, boolean hovered) {
         try {
@@ -257,6 +378,11 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     /**
      * Renders a message when no spells are available.
+     * <p>
+     * Displays "No spells available" centered in the panel's content area.
+     * Text alpha is animated during fade-in.
+     *
+     * @param context the drawing context
      */
     private void renderEmptyState(DrawContext context) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -273,6 +399,21 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     // ==================== Input Handling ====================
 
+    /**
+     * Handles mouse click events.
+     * <p>
+     * Processes clicks in the following priority:
+     * <ol>
+     *     <li>Click on spell icon: Selects the spell and invokes callback</li>
+     *     <li>Click outside icons: Cancels selection and invokes cancel callback</li>
+     * </ol>
+     * Only left mouse button clicks are handled.
+     *
+     * @param mouseX the mouse x-coordinate
+     * @param mouseY the mouse y-coordinate
+     * @param button the mouse button (0=left, 1=right, 2=middle)
+     * @return {@code true} if the click was handled, {@code false} otherwise
+     */
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) { // Only handle left clicks
@@ -304,6 +445,12 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     /**
      * Checks if the mouse is over a specific icon.
+     *
+     * @param mouseX the mouse x-coordinate
+     * @param mouseY the mouse y-coordinate
+     * @param iconX the icon x-coordinate
+     * @param iconY the icon y-coordinate
+     * @return {@code true} if mouse is within icon bounds, {@code false} otherwise
      */
     private boolean isMouseOverIcon(double mouseX, double mouseY, int iconX, int iconY) {
         return mouseX >= iconX && mouseX < iconX + ICON_SIZE &&
@@ -312,11 +459,25 @@ public class SpellSelectionOverlay implements Drawable, Element {
 
     // ==================== Element Interface ====================
 
+    /**
+     * Sets focus state for this element.
+     * <p>
+     * The overlay is always focused when visible to capture all input.
+     *
+     * @param focused the focus state (ignored)
+     */
     @Override
     public void setFocused(boolean focused) {
         // Always focused when visible
     }
 
+    /**
+     * Checks if this element has focus.
+     * <p>
+     * The overlay is always focused when visible to capture all input.
+     *
+     * @return {@code true} always
+     */
     @Override
     public boolean isFocused() {
         return true;
@@ -325,14 +486,18 @@ public class SpellSelectionOverlay implements Drawable, Element {
     // ==================== Getters ====================
 
     /**
-     * @return The target slot index for the selected spell
+     * Gets the target slot index for the selected spell.
+     *
+     * @return the slot index where the selected spell will be assigned
      */
     public int getTargetSlotIndex() {
         return targetSlotIndex;
     }
 
     /**
-     * @return Number of available spells
+     * Gets the number of available spells.
+     *
+     * @return the count of spells in the selection grid
      */
     public int getSpellCount() {
         return availableSpells.size();

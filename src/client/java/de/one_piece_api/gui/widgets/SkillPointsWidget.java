@@ -15,28 +15,48 @@ import java.util.Objects;
 
 /**
  * Widget for displaying available skill points with custom styling.
+ * <p>
+ * This widget renders the player's current skill points with configurable
+ * colors from the category configuration. The text uses a custom font and
+ * is underlined for emphasis.
  *
- * Features:
- * - Displays current skill points from category data
- * - Uses custom font and formatting
- * - Configurable position
- * - Handles missing or null category data gracefully
+ * <h2>Features:</h2>
+ * <ul>
+ *     <li>Displays current skill points from category data</li>
+ *     <li>Uses custom font (Montserrat) and formatting</li>
+ *     <li>Configurable position for flexible layout</li>
+ *     <li>Handles missing or null category data gracefully</li>
+ *     <li>Retrieves colors from category configuration</li>
+ * </ul>
  *
- * Thread Safety: Not thread-safe. Should only be accessed from the render thread.
+ * <h2>Thread Safety:</h2>
+ * Not thread-safe. Should only be accessed from the render thread.
+ *
+ * @see Drawable
+ * @see ClientCategoryData
  */
 public class SkillPointsWidget implements Drawable {
 
     // ==================== Constants ====================
 
+    /** Label text displayed before the skill points number */
     private static final String SKILL_POINTS_TEXT = "Skill points: ";
+
+    /** Default text color (white) used when configuration is unavailable */
     private static final int DEFAULT_COLOR = 0xFFFFFFFF;
 
     // ==================== Fields ====================
 
+    /** Text renderer for drawing the skill points text */
     private final TextRenderer textRenderer;
 
+    /** X-coordinate where the widget is rendered */
     private int x;
+
+    /** Y-coordinate where the widget is rendered */
     private int y;
+
+    /** Category data containing skill points information */
     private ClientCategoryData categoryData;
 
     // ==================== Constructor ====================
@@ -44,7 +64,7 @@ public class SkillPointsWidget implements Drawable {
     /**
      * Creates a new skill points widget.
      *
-     * @param textRenderer The text renderer to use for drawing
+     * @param textRenderer the text renderer to use for drawing
      * @throws NullPointerException if textRenderer is null
      */
     public SkillPointsWidget(TextRenderer textRenderer) {
@@ -57,9 +77,11 @@ public class SkillPointsWidget implements Drawable {
 
     /**
      * Sets the position where the widget should be rendered.
+     * <p>
+     * The position represents the top-left corner of the text.
      *
-     * @param x X coordinate in screen space
-     * @param y Y coordinate in screen space
+     * @param x x-coordinate in screen space
+     * @param y y-coordinate in screen space
      */
     public void setPosition(int x, int y) {
         this.x = x;
@@ -68,8 +90,12 @@ public class SkillPointsWidget implements Drawable {
 
     /**
      * Updates the category data to display.
+     * <p>
+     * When category data changes (e.g., after spending skill points),
+     * call this method to update the display.
      *
-     * @param categoryData The category data containing skill point information, or null to clear
+     * @param categoryData the category data containing skill point information,
+     *                     or {@code null} to clear and stop rendering
      */
     public void setCategoryData(ClientCategoryData categoryData) {
         this.categoryData = categoryData;
@@ -78,7 +104,7 @@ public class SkillPointsWidget implements Drawable {
     /**
      * Checks if the widget has valid data to display.
      *
-     * @return true if category data is available
+     * @return {@code true} if category data is available, {@code false} otherwise
      */
     public boolean hasData() {
         return categoryData != null;
@@ -86,6 +112,19 @@ public class SkillPointsWidget implements Drawable {
 
     // ==================== Rendering ====================
 
+    /**
+     * Renders the skill points widget.
+     * <p>
+     * If no category data is available, nothing is rendered. Otherwise,
+     * displays "Skill points: X" where X is the current available points,
+     * using the configured color and custom font styling.
+     *
+     * @param context the drawing context
+     * @param mouseX the mouse x-coordinate (unused)
+     * @param mouseY the mouse y-coordinate (unused)
+     * @param delta the frame delta time (unused)
+     * @throws NullPointerException if context is null
+     */
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         Objects.requireNonNull(context, "DrawContext cannot be null");
@@ -102,8 +141,11 @@ public class SkillPointsWidget implements Drawable {
 
     /**
      * Creates the formatted text to display.
+     * <p>
+     * Constructs a text component with the skill points label and current
+     * count, styled with the Montserrat font and underline formatting.
      *
-     * @return Styled text showing skill points
+     * @return styled text showing skill points
      */
     private Text createDisplayText() {
         int pointsLeft = categoryData.getPointsLeft();
@@ -117,8 +159,15 @@ public class SkillPointsWidget implements Drawable {
 
     /**
      * Gets the color to use for the skill points text from category configuration.
+     * <p>
+     * Attempts to retrieve the fill color from the category's points color
+     * configuration. Falls back to {@link #DEFAULT_COLOR} (white) if:
+     * <ul>
+     *     <li>Configuration is null or incomplete</li>
+     *     <li>Any exception occurs during retrieval</li>
+     * </ul>
      *
-     * @return ARGB color value, or default white if not configured
+     * @return ARGB color value for the text
      */
     private int getPointsColor() {
         try {
@@ -139,9 +188,9 @@ public class SkillPointsWidget implements Drawable {
     /**
      * Renders the text at the configured position.
      *
-     * @param context The draw context
-     * @param text The text to render
-     * @param color The text color
+     * @param context the drawing context
+     * @param text the text to render
+     * @param color the ARGB text color
      */
     private void renderText(DrawContext context, Text text, int color) {
         context.drawText(textRenderer, text, x, y, color, false);
@@ -150,21 +199,27 @@ public class SkillPointsWidget implements Drawable {
     // ==================== Getters ====================
 
     /**
-     * @return The current X position
+     * Gets the current x-coordinate where the widget is rendered.
+     *
+     * @return the x-coordinate in screen space
      */
     public int getX() {
         return x;
     }
 
     /**
-     * @return The current Y position
+     * Gets the current y-coordinate where the widget is rendered.
+     *
+     * @return the y-coordinate in screen space
      */
     public int getY() {
         return y;
     }
 
     /**
-     * @return The current skill points, or 0 if no data
+     * Gets the current number of available skill points.
+     *
+     * @return the skill points remaining, or 0 if no data is available
      */
     public int getPointsLeft() {
         return hasData() ? categoryData.getPointsLeft() : 0;
