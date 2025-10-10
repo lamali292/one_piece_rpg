@@ -32,5 +32,19 @@ public class EventRegistry {
         void onLevelUp(ServerPlayerEntity player, Identifier categoryId, int oldLevel, int newLevel);
     }
 
+    public static final Event<ClassUpdateCallback> CLASS_UPDATE = Event.create(listeners ->
+            (player, oldClassId, newClassId) -> {
+                for (ClassUpdateCallback listener : listeners) {
+                    listener.onClassUpdate(player, oldClassId, newClassId);
+                }
+            }
+    );
+
+    @FunctionalInterface
+    public interface ClassUpdateCallback {
+        void onClassUpdate(ServerPlayerEntity player, Identifier oldClassId, Identifier newClassId);
+    }
+
+
 
 }

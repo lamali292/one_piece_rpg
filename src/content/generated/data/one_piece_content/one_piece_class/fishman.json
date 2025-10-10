@@ -5,7 +5,7 @@
   "nameTexture": "one_piece_content:textures/classes/fishman_name.png",
   "rewards": [
     {
-      "levelCondition": 1,
+      "level": 1,
       "reward": {
         "type": "one_piece_api:passive_ability",
         "data": {

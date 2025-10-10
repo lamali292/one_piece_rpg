@@ -3,6 +3,7 @@ package de.one_piece_api.network;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_api.data.loader.DataLoaders;
+import de.one_piece_api.event.EventRegistry;
 import de.one_piece_api.mixin_interface.IClassPlayer;
 import de.one_piece_api.mixin_interface.ICombatPlayer;
 import de.one_piece_api.mixin_interface.ISpellPlayer;
@@ -25,7 +26,10 @@ public class ServerPacketHandler {
 
         context.server().execute(() -> {
             if (context.player() instanceof IClassPlayer player) {
-                player.onepiece$setOnePieceClass(payload.className());
+                var oldClass = player.onepiece$getOnePieceClass();
+                var newClass = payload.className();
+                player.onepiece$setOnePieceClass(newClass);
+                EventRegistry.CLASS_UPDATE.invoker().onClassUpdate(context.player(), oldClass, newClass);
             }
         });
     }

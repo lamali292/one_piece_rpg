@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import java.util.stream.Stream;
-
 public class OnePieceRPG {
     public static final String MOD_ID = "one_piece_api";
 
@@ -16,6 +14,7 @@ public class OnePieceRPG {
 
     public static final Marker CLIENT_PAYLOAD_MARKER = MarkerFactory.getMarker("CLIENT PAYLOAD");
     public static final Marker SERVER_PAYLOAD_MARKER = MarkerFactory.getMarker("SERVER PAYLOAD");
+    public static final Marker CLASS_REWARD_HANDLER = MarkerFactory.getMarker("ClassRewardHandler");
 
     public static final boolean DEBUG = true;
 
@@ -28,10 +27,10 @@ public class OnePieceRPG {
         return 8;
     }
 
-    public static void debug(Marker clientPayloadMarker, String s, Object... arguments) {
+    public static void debug(Marker marker, String s, Object... arguments) {
         if (DEBUG) {
-            String message = "["+clientPayloadMarker.getName() +"] "+ s;
-            LOGGER.info(clientPayloadMarker, message, arguments);
+            String message = "["+ marker.getName() +"] "+ s;
+            LOGGER.info(marker, message, arguments);
         }
     }
 

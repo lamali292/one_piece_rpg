@@ -2,8 +2,8 @@ package de.one_piece_api;
 
 import de.one_piece_api.ability.handler.PassiveAbilityHandler;
 import de.one_piece_api.data.loader.DataLoaders;
-import de.one_piece_api.data.source.ItemExperienceSource;
-import de.one_piece_api.data.source.TimeExperienceSource;
+import de.one_piece_api.data.experience.ItemExperienceSource;
+import de.one_piece_api.data.experience.TimeExperienceSource;
 import de.one_piece_api.event.ServerEvents;
 import de.one_piece_api.init.MyCommands;
 import de.one_piece_api.init.MyRewards;

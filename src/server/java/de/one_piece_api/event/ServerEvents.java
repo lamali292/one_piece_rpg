@@ -1,18 +1,21 @@
 package de.one_piece_api.event;
 
+import de.one_piece_api.ClassRewardHandler;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.DevilFruitConfig;
+import de.one_piece_api.data.experience.ItemExperienceSource;
+import de.one_piece_api.data.experience.TimeExperienceSource;
 import de.one_piece_api.data.loader.CategoryLoader;
 import de.one_piece_api.data.loader.DataLoaders;
-import de.one_piece_api.data.source.ItemExperienceSource;
-import de.one_piece_api.data.source.TimeExperienceSource;
+import de.one_piece_api.init.MyAttributes;
+import de.one_piece_api.init.MyCommands;
+import de.one_piece_api.init.MyDataComponentTypes;
+import de.one_piece_api.mixin_interface.IClassPlayer;
 import de.one_piece_api.mixin_interface.IDevilFruitPlayer;
 import de.one_piece_api.mixin_interface.IStaminaPlayer;
 import de.one_piece_api.network.payload.DevilFruitPayload;
 import de.one_piece_api.network.payload.SyncStylesPayload;
-import de.one_piece_api.init.MyAttributes;
-import de.one_piece_api.init.MyCommands;
-import de.one_piece_api.init.MyDataComponentTypes;
+import de.one_piece_api.util.OnePieceCategory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -41,17 +44,20 @@ public class ServerEvents {
     public static void register() {
         ServerTickEvents.START_SERVER_TICK.register(ServerEvents::onServerTick);
         ServerPlayConnectionEvents.JOIN.register(ServerEvents::onPlayerJoin);
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            processedStacks.remove(handler.getPlayer().getUuid());
-        });
+        ServerPlayConnectionEvents.DISCONNECT.register(ServerEvents::onPlayerDisconnect);
 
         ServerLifecycleEvents.SERVER_STARTING.register(ServerEvents::onServerStarted);
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(ServerEvents::onEndDataPackReload);
 
         EventRegistry.DEVIL_FRUIT_EATEN.register(ServerEvents::onDevilFruitEaten);
         EventRegistry.LEVEL_UP.register(ServerEvents::onLevelUp);
+        EventRegistry.CLASS_UPDATE.register(ClassRewardHandler::onClassUpdate);
     }
 
+
+    /**
+     * Checks for new class rewards when a player levels up.
+     */
     public static void onLevelUp(ServerPlayerEntity player, Identifier categoryId,
                                  int oldLevel, int newLevel) {
         // Load attribute scaling configuration and update player attributes
@@ -73,11 +79,18 @@ public class ServerEvents {
             if (crouchAddAttr != null) {
                 crouchAddAttr.setBaseValue(attributeScalingConfig.evaluateStaminaCrouchAdditive(newLevel));
             }
-            OnePieceRPG.LOGGER.debug("Updated attributes for player {} at level {}", player.getName().getString(), newLevel);
+            OnePieceRPG.LOGGER.debug("Updated attributes for player {} at level {}",
+                    player.getName().getString(), newLevel);
         }, () -> {
-            OnePieceRPG.LOGGER.warn("Attribute scaling configuration not loaded for player {}", player.getName().getString());
+            OnePieceRPG.LOGGER.warn("Attribute scaling configuration not loaded for player {}",
+                    player.getName().getString());
         });
+        if (categoryId.equals(OnePieceCategory.ID)) {
+            ClassRewardHandler.refreshRewards(player);
+        }
+
     }
+
 
     private static void onDevilFruitEaten(ServerPlayerEntity serverPlayerEntity, Identifier identifier) {
         if (serverPlayerEntity instanceof IDevilFruitPlayer player) {
@@ -93,8 +106,6 @@ public class ServerEvents {
     private static void onServerStarted(MinecraftServer minecraftServer) {
         reloadCategoryData();
     }
-
-
 
     private static void onEndDataPackReload(MinecraftServer server, LifecycledResourceManager resourceManager, boolean success) {
         if (success) {
@@ -115,26 +126,23 @@ public class ServerEvents {
                 DataLoaders.SKILL_LOADER.getItems()
         );
         CategoryLoader.addCategory(categoryConfig.id(), categoryConfig);
-
     }
-
-
-
 
     private static void onServerTick(MinecraftServer server) {
         server.getPlayerManager().getPlayerList().forEach(ServerEvents::onServerPlayerTick);
     }
 
     private static final Map<UUID, Integer> playerTickCounters = new HashMap<>();
+    private static final int TICKS_PER_HOUR = 20 * 60 * 60; // 20 ticks/sec * 60 sec * 60 min
 
-    private static final int TICKS_PER_HOUR= 20 * 60 * 60; // 20 ticks/sec * 60 sec * 10 min = 12000 ticks
     private static void onServerPlayerTick(ServerPlayerEntity player) {
-       UUID playerId = player.getUuid();
+        UUID playerId = player.getUuid();
         int currentTicks = playerTickCounters.getOrDefault(playerId, 0) + 1;
 
         if (player instanceof IStaminaPlayer staminaPlayer) {
             staminaPlayer.onepiece$updateStamina();
         }
+
         if (currentTicks >= TICKS_PER_HOUR) {
             // Give XP every hour
             player.sendMessage(Text.of("You received 50 XP because you were 1h on server"), false);
@@ -147,7 +155,6 @@ public class ServerEvents {
         } else {
             playerTickCounters.put(playerId, currentTicks);
         }
-
 
         ScreenHandler currentHandler = player.currentScreenHandler;
         if (currentHandler != null && !trackedHandlers.containsKey(currentHandler)) {
@@ -166,6 +173,15 @@ public class ServerEvents {
 
         var packet = new SyncStylesPayload(DataLoaders.STYLE_LOADER.getItems());
         ServerPlayNetworking.send(player, packet);
+
+        ClassRewardHandler.refreshRewards(player);
+    }
+
+    private static void onPlayerDisconnect(ServerPlayNetworkHandler handler, MinecraftServer server) {
+        UUID playerId = handler.getPlayer().getUuid();
+        processedStacks.remove(playerId);
+
+        ClassRewardHandler.clearRewards(handler.getPlayer());
     }
 
     private static void addListenerToHandler(ServerPlayerEntity player, ScreenHandler handler) {
@@ -179,7 +195,6 @@ public class ServerEvents {
                     if (playerStacks != null) {
                         ItemStack previousStack = playerStacks.get(slotId);
 
-                        // Only process if it's a new item or stack count increased
                         boolean shouldProcess = previousStack == null ||
                                 previousStack.isEmpty() ||
                                 !ItemStack.areEqual(stack, previousStack) ||
@@ -191,7 +206,6 @@ public class ServerEvents {
                         }
                     }
                 } else {
-                    // Remove from tracking if slot is empty or no component
                     Map<Integer, ItemStack> playerStacks = processedStacks.get(player.getUuid());
                     if (playerStacks != null) {
                         playerStacks.remove(slotId);
