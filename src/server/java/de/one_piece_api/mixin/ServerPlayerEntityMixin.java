@@ -1,7 +1,7 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.IClassPlayer;
-import de.one_piece_api.interfaces.ISpellPlayer;
+import de.one_piece_api.mixin_interface.IClassPlayer;
+import de.one_piece_api.mixin_interface.ISpellPlayer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

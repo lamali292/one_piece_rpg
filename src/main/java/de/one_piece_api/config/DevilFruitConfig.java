@@ -1,6 +1,5 @@
 package de.one_piece_api.config;
 
-import de.one_piece_api.util.LoaderContext;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.JsonElement;
@@ -22,12 +21,12 @@ public record DevilFruitConfig(
     public static final DevilFruitConfig DEFAULT = new DevilFruitConfig(List.of(), List.of(), Identifier.of(""));
 
 
-    public static Result<DevilFruitConfig, Problem> parse(JsonElement rootElement, LoaderContext context) {
+    public static Result<DevilFruitConfig, Problem> parse(JsonElement rootElement, ConfigContext context) {
         return rootElement.getAsObject().andThen(rootObject -> parse(rootObject, context));
     }
 
     public static Result<DevilFruitConfig, Problem> parse(
-            JsonObject obj, LoaderContext context
+            JsonObject obj, ConfigContext context
     ) {
         List<Problem> problems = new ArrayList<>();
 

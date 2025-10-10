@@ -2,9 +2,10 @@ package de.one_piece_content_data.data;
 
 import com.google.gson.*;
 import com.google.gson.annotations.JsonAdapter;
-import de.one_piece_api.config.ConnectionsConfig;
-import de.one_piece_api.config.SpellConfig;
-import de.one_piece_api.node.SpellContainerReward;
+import de.one_piece_api.config.skill.ConnectionsConfig;
+import de.one_piece_api.config.spell.SpellConfig;
+import de.one_piece_api.reward.PassiveAbilityReward;
+import de.one_piece_api.reward.SpellContainerReward;
 import de.one_piece_content_data.rewards.AttributeReward;
 import net.minecraft.advancement.AdvancementFrame;
 import net.minecraft.entity.effect.StatusEffect;
@@ -146,6 +147,9 @@ public class JsonParser {
                     return reward.toJson();
                 }
                 case AttributeReward reward -> {
+                    return reward.toJson();
+                }
+                case PassiveAbilityReward reward -> {
                     return reward.toJson();
                 }
                 case null, default -> throw new IllegalArgumentException("Unknown Reward type: " + src);

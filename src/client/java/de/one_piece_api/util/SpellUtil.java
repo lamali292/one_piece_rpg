@@ -1,6 +1,6 @@
 package de.one_piece_api.util;
 
-import de.one_piece_api.interfaces.ISpellPlayer;
+import de.one_piece_api.mixin_interface.ISpellPlayer;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;

@@ -54,6 +54,12 @@
     "y": 120
   },
   {
+    "definition": "one_piece_content:master_of_the_seas",
+    "isRoot": true,
+    "x": 0,
+    "y": 0
+  },
+  {
     "definition": "one_piece_content:requires_both",
     "isRoot": false,
     "x": 0,

@@ -1,6 +1,6 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.ICombatPlayer;
+import de.one_piece_api.mixin_interface.ICombatPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;

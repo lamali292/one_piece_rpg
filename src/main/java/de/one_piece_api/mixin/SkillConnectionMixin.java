@@ -1,6 +1,6 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.StyledConnection;
+import de.one_piece_api.mixin_interface.StyledConnection;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.common.SkillConnection;
 import org.spongepowered.asm.mixin.Mixin;

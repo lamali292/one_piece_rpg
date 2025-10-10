@@ -1,0 +1,6 @@
+{
+  "max_stamina": "100 + (level ^ 1.5) * 5",
+  "stamina_base_regen": "1 + level * 0.5",
+  "stamina_crouch_multiplier": "1.5 + level * 0.1",
+  "stamina_crouch_additive": "2 + level * 0.25"
+}

@@ -1,9 +1,9 @@
 package de.one_piece_api.hud;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import de.one_piece_api.interfaces.ICombatPlayer;
-import de.one_piece_api.interfaces.IStaminaCost;
-import de.one_piece_api.interfaces.IStaminaPlayer;
+import de.one_piece_api.mixin_interface.ICombatPlayer;
+import de.one_piece_api.mixin_interface.IStaminaCost;
+import de.one_piece_api.mixin_interface.IStaminaPlayer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;

@@ -1,7 +1,7 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.ICombatPlayer;
-import de.one_piece_api.interfaces.ISpellPlayer;
+import de.one_piece_api.mixin_interface.ICombatPlayer;
+import de.one_piece_api.mixin_interface.ISpellPlayer;
 import de.one_piece_api.util.SpellUtil;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.GameOptions;

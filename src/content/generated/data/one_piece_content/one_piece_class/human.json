@@ -3,8 +3,5 @@
   "description": "Auto-generated description for Human class",
   "name": "Human",
   "nameTexture": "one_piece_content:textures/classes/human_name.png",
-  "passive": "human_passive",
-  "primary": "human_primary",
-  "primaryColor": "#E74C3C",
-  "secondaryColor": "#A93226"
+  "rewards": []
 }

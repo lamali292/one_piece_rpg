@@ -1,9 +1,11 @@
 package de.one_piece_content;
 
-import de.one_piece_content.registries.MySounds;
+import de.one_piece_api.ability.PassiveAbility;
+import de.one_piece_api.ability.PassiveAbilityRegistry;
 import de.one_piece_content.spells.SpellHandler;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.api.ModInitializer;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,21 @@ public class ExampleMod implements DedicatedServerModInitializer {
 		LOGGER.info("Example Content initializing");
 		//MySounds.register();
 		SpellHandler.register();
+
+
+		PassiveAbilityRegistry.register(new PassiveAbility.Builder(id("master_of_the_seas"))
+				.condition(entity->{
+					if (entity instanceof PlayerEntity player) {
+						return player.isTouchingWater();
+					}
+					return false;
+				})
+				.addStatusEffect(StatusEffects.DOLPHINS_GRACE, 1, 0, true, false,false)
+				.addStatusEffect(StatusEffects.WATER_BREATHING, 1, 0, true, false,false)
+				.addCustomEffect(entity -> {
+
+				}).build()
+		);
 	}
 
 	public static Identifier id(String name) {

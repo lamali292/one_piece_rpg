@@ -1,6 +1,6 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.hud.ISkillsClientMod;
+import de.one_piece_api.util.ISkillsClientMod;
 import net.minecraft.client.option.KeyBinding;
 import net.puffish.skillsmod.client.SkillsClientMod;
 import net.puffish.skillsmod.client.data.ClientSkillScreenData;

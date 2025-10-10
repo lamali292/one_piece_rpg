@@ -91,36 +91,17 @@ public class MyCodecs {
 
 
 
-    record Intermediate1(ColorConfig primaryColor, ColorConfig secondaryColor, Identifier backTexture, Identifier nameTexture) {
-        public static Intermediate1 from(ClassConfig config) {
-            return new Intermediate1(config.primaryColor(), config.secondaryColor(), config.backTexture(), config.nameTexture());
-        }
-    }
-
-    private static final PacketCodec<PacketByteBuf, Intermediate1> INTERMEDIATE1 = PacketCodec.tuple(
-            COLOR,
-            Intermediate1::primaryColor,
-            COLOR,
-            Intermediate1::secondaryColor,
-            Identifier.PACKET_CODEC,
-            Intermediate1::backTexture,
-            Identifier.PACKET_CODEC,
-            Intermediate1::nameTexture,
-            Intermediate1::new
-    );
 
     public static final PacketCodec<PacketByteBuf, ClassConfig> CLASS_CONFIG = PacketCodec.tuple(
                 TextCodecs.PACKET_CODEC,
                 ClassConfig::name,
                 TextCodecs.PACKET_CODEC,
                 ClassConfig::description,
-                PacketCodecs.STRING,
-                ClassConfig::primary,
-                PacketCodecs.STRING,
-                ClassConfig::passive,
-                INTERMEDIATE1,
-                Intermediate1::from,
-                (a, b, c, d, e) -> new ClassConfig(Text.of(a), Text.of(b), c, d, e.primaryColor(), e.secondaryColor(), e.backTexture(), e.nameTexture())
+                Identifier.PACKET_CODEC,
+                ClassConfig::backTexture,
+                Identifier.PACKET_CODEC,
+                ClassConfig::nameTexture,
+                (a, b,  d, e) -> new ClassConfig(Text.of(a), Text.of(b), null, d, e)
         );
 
 

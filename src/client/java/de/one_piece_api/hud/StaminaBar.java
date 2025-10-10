@@ -1,7 +1,7 @@
 package de.one_piece_api.hud;
 
-import de.one_piece_api.interfaces.IStaminaPlayer;
-import de.one_piece_api.registries.MyAttributes;
+import de.one_piece_api.mixin_interface.IStaminaPlayer;
+import de.one_piece_api.init.MyAttributes;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;

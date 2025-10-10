@@ -3,8 +3,5 @@
   "description": "Auto-generated description for Mink class",
   "name": "Mink",
   "nameTexture": "one_piece_content:textures/classes/mink_name.png",
-  "passive": "mink_passive",
-  "primary": "mink_primary",
-  "primaryColor": "#F39C12",
-  "secondaryColor": "#D68910"
+  "rewards": []
 }

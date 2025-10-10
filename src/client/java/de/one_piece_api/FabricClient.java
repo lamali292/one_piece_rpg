@@ -1,8 +1,9 @@
 package de.one_piece_api;
 
-import de.one_piece_api.registries.*;
+import de.one_piece_api.event.ClientEvents;
+import de.one_piece_api.init.*;
 import de.one_piece_api.util.ClientData;
-import de.one_piece_api.util.TextureFramebufferCache;
+import de.one_piece_api.render.TextureFramebufferCache;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -25,7 +26,7 @@ public class FabricClient implements ClientModInitializer {
     /**
      * Initializes all client-side components of the mod.
      * <p>
-     * This method is called by Fabric during client startup and performs the following:
+     * This method is called by Fabric during the client startup and performs the following:
      * <ul>
      *     <li>Registers custom keybindings via {@link MyKeys}</li>
      *     <li>Registers network packet receivers via {@link MyClientPayloads}</li>

@@ -3,8 +3,17 @@
   "description": "Auto-generated description for Fishman class",
   "name": "Fishman",
   "nameTexture": "one_piece_content:textures/classes/fishman_name.png",
-  "passive": "fishman_passive",
-  "primary": "fishman_primary",
-  "primaryColor": "#2E86C1",
-  "secondaryColor": "#1B4F72"
+  "rewards": [
+    {
+      "levelCondition": 1,
+      "reward": {
+        "type": "one_piece_api:passive_ability",
+        "data": {
+          "abilities": [
+            "one_piece_content:master_of_the_seas"
+          ]
+        }
+      }
+    }
+  ]
 }
