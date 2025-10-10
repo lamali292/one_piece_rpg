@@ -1,7 +1,7 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.IDevilFruitPlayer;
-import de.one_piece_api.items.DevilFruitItem;
+import de.one_piece_api.mixin_interface.IDevilFruitPlayer;
+import de.one_piece_api.item.DevilFruitItem;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;

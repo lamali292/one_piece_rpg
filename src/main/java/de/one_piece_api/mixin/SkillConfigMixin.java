@@ -1,6 +1,6 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.IHidden;
+import de.one_piece_api.mixin_interface.IHidden;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

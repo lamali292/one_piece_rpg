@@ -2,6 +2,7 @@ package de.one_piece_content.spells;
 
 import de.one_piece_content.ExampleMod;
 import de.one_piece_content.registries.MySounds;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
@@ -17,8 +18,10 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.spell_engine.api.spell.Spell;
+import net.spell_engine.api.spell.event.SpellEvents;
 import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.internals.SpellHelper;
+import net.spell_engine.internals.casting.SpellCast;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

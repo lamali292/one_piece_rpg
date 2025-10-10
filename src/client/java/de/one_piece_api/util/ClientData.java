@@ -2,6 +2,7 @@ package de.one_piece_api.util;
 
 import de.one_piece_api.config.ClassConfig;
 import de.one_piece_api.config.DevilFruitConfig;
+import de.one_piece_api.util.reactive.Observable;
 import net.minecraft.util.Identifier;
 
 import java.util.Map;

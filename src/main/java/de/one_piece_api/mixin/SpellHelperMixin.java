@@ -1,8 +1,7 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.OnePieceRPG;
-import de.one_piece_api.interfaces.IStaminaCost;
-import de.one_piece_api.interfaces.IStaminaPlayer;
+import de.one_piece_api.mixin_interface.IStaminaCost;
+import de.one_piece_api.mixin_interface.IStaminaPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;

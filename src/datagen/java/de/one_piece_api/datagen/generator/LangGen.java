@@ -1,11 +1,10 @@
 package de.one_piece_api.datagen.generator;
 
 import de.one_piece_api.OnePieceRPG;
-import de.one_piece_api.registries.MyItems;
-import de.one_piece_api.registries.MyKeys;
+import de.one_piece_api.init.MyItems;
+import de.one_piece_api.init.MyKeys;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.fabricmc.loader.impl.util.StringUtil;
 import net.minecraft.registry.RegistryWrapper;
 
 import java.util.concurrent.CompletableFuture;

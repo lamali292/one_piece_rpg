@@ -2,7 +2,7 @@ package de.one_piece_api.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import de.one_piece_api.hud.CustomSpellHotBarWidget;
-import de.one_piece_api.interfaces.IStaminaCost;
+import de.one_piece_api.mixin_interface.IStaminaCost;
 import net.minecraft.client.gui.DrawContext;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.client.gui.HudRenderHelper;

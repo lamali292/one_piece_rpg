@@ -1,25 +1,14 @@
 package de.one_piece_api.datagen.generator;
 
 import com.google.gson.*;
-import de.one_piece_api.OnePieceRPG;
-import de.one_piece_api.content.CategoryLoader;
+import de.one_piece_api.data.loader.CategoryLoader;
 import de.one_piece_api.datagen.JsonHandler;
 import de.one_piece_api.util.OnePieceCategory;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.data.DataOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.DataWriter;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.puffish.skillsmod.common.BackgroundPosition;
-import net.puffish.skillsmod.config.BackgroundConfig;
-import net.puffish.skillsmod.config.GeneralConfig;
-import net.puffish.skillsmod.config.IconConfig;
-import net.puffish.skillsmod.config.colors.ColorConfig;
-import net.puffish.skillsmod.config.colors.ColorsConfig;
-import net.puffish.skillsmod.config.colors.ConnectionsColorsConfig;
-import net.puffish.skillsmod.config.colors.FillStrokeColorsConfig;
-import net.puffish.skillsmod.config.experience.ExperienceConfig;
 
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;

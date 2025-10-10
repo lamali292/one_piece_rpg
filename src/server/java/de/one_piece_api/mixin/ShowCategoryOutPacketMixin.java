@@ -1,8 +1,8 @@
 package de.one_piece_api.mixin;
 
 
-import de.one_piece_api.interfaces.IHidden;
-import de.one_piece_api.interfaces.StyledConnection;
+import de.one_piece_api.mixin_interface.IHidden;
+import de.one_piece_api.mixin_interface.StyledConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.puffish.skillsmod.common.SkillConnection;
 import net.puffish.skillsmod.config.skill.SkillConfig;

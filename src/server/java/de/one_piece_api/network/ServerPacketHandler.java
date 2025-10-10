@@ -2,11 +2,12 @@ package de.one_piece_api.network;
 
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.DevilFruitConfig;
-import de.one_piece_api.content.DataLoader;
-import de.one_piece_api.interfaces.IClassPlayer;
-import de.one_piece_api.interfaces.ICombatPlayer;
-import de.one_piece_api.interfaces.ISpellPlayer;
-import de.one_piece_api.util.SkillHelper;
+import de.one_piece_api.data.loader.DataLoaders;
+import de.one_piece_api.mixin_interface.IClassPlayer;
+import de.one_piece_api.mixin_interface.ICombatPlayer;
+import de.one_piece_api.mixin_interface.ISpellPlayer;
+import de.one_piece_api.network.payload.*;
+import de.one_piece_api.util.helper.SkillHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -53,14 +54,14 @@ public class ServerPacketHandler {
     public static void handleClassConfigRequest(ClassConfigPayload.Request request, ServerPlayNetworking.Context context) {
         OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} requested classes", context.player().getName().getString());
 
-        context.server().execute(() -> context.responseSender().sendPacket(new ClassConfigPayload(DataLoader.CLASS_LOADER.getItems())));
+        context.server().execute(() -> context.responseSender().sendPacket(new ClassConfigPayload(DataLoaders.CLASS_LOADER.getItems())));
     }
 
     public static void handleDevilFruitRequest(DevilFruitPayload.Request request, ServerPlayNetworking.Context context) {
         OnePieceRPG.debug(OnePieceRPG.SERVER_PAYLOAD_MARKER, "{} requested devil fruits: {}", context.player().getName().getString(), request.identifier().toString() );
         context.server().execute(() -> {
             Identifier id = request.identifier();
-            DevilFruitConfig config = DataLoader.DEVIL_FRUIT_LOADER.getItems().get(id);
+            DevilFruitConfig config = DataLoaders.DEVIL_FRUIT_LOADER.getItems().get(id);
             if (config == null) {
                 config = DevilFruitConfig.DEFAULT;
             }

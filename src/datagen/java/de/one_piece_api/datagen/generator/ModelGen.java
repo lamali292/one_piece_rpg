@@ -1,6 +1,6 @@
 package de.one_piece_api.datagen.generator;
 
-import de.one_piece_api.registries.MyItems;
+import de.one_piece_api.init.MyItems;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.client.BlockStateModelGenerator;

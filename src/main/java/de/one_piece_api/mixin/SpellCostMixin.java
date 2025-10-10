@@ -1,6 +1,6 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.interfaces.IStaminaCost;
+import de.one_piece_api.mixin_interface.IStaminaCost;
 import net.spell_engine.api.spell.Spell;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

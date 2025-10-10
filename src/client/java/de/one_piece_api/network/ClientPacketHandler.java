@@ -1,8 +1,12 @@
 package de.one_piece_api.network;
 
 import de.one_piece_api.OnePieceRPG;
-import de.one_piece_api.gui.OnePieceScreen;
-import de.one_piece_api.registries.ClientStyleRegistry;
+import de.one_piece_api.screen.OnePieceScreen;
+import de.one_piece_api.network.payload.ClassConfigPayload;
+import de.one_piece_api.network.payload.DevilFruitPayload;
+import de.one_piece_api.network.payload.SyncStylesPayload;
+import de.one_piece_api.network.payload.UiPayload;
+import de.one_piece_api.registry.ClientStyleRegistry;
 import de.one_piece_api.util.ClientData;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.sound.PositionedSoundInstance;

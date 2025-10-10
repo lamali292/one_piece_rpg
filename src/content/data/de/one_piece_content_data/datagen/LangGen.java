@@ -1,8 +1,8 @@
 package de.one_piece_content_data.datagen;
 
 import de.one_piece_content.ExampleMod;
-import de.one_piece_api.config.SkillDefinitionConfig;
-import de.one_piece_api.config.SpellConfig;
+import de.one_piece_api.config.skill.SkillDefinitionConfig;
+import de.one_piece_api.config.spell.SpellConfig;
 import de.one_piece_content_data.registry.Registries;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
