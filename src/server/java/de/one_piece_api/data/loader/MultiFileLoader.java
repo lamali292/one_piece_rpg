@@ -55,7 +55,10 @@ public class MultiFileLoader<T> extends BaseLoader<T> {
                         .getSuccess()
                         .orElseThrow();
                 Result<T, Problem> result = parser.apply(root, context);
-
+                result.getFailure().ifPresent(problem -> {
+                    OnePieceRPG.LOGGER.error("[{}] Failed to parse {}: {}", folderName, id, problem);
+                    failed.merge(fileId.getNamespace(), 1, Integer::sum);
+                });
                 result.getSuccess().ifPresent(item -> {
                     items.put(id, item);
                     loaded.merge(fileId.getNamespace(), 1, Integer::sum);

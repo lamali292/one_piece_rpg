@@ -6,7 +6,6 @@ import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
 import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
-import net.puffish.skillsmod.api.reward.Reward;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.config.skill.SkillRewardConfig;
@@ -41,20 +40,20 @@ public record ClassConfig(
      * When the player reaches the specified level, the reward is automatically
      * granted. This allows for progressive unlocking of abilities and bonuses.
      *
-     * @param levelCondition the level at which this reward is granted
+     * @param level the level at which this reward is granted
      * @param reward the reward configuration to grant
      */
-    public record LevelReward(int levelCondition, SkillRewardConfig reward) {
+    public record LevelReward(int level, SkillRewardConfig reward) {
         /**
          * Creates a new level-gated reward.
          *
-         * @param levelCondition the required level (must be >= 1)
+         * @param level the required level (must be >= 1)
          * @param reward the reward configuration to grant (must not be null)
-         * @throws IllegalArgumentException if levelCondition < 1 or reward is null
+         * @throws IllegalArgumentException if level < 1 or reward is null
          */
         public LevelReward {
-            if (levelCondition < 1) {
-                throw new IllegalArgumentException("Level condition must be >= 1, got: " + levelCondition);
+            if (level < 1) {
+                throw new IllegalArgumentException("Level condition must be >= 1, got: " + level);
             }
             if (reward == null) {
                 throw new IllegalArgumentException("Reward cannot be null");
