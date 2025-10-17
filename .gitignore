@@ -18,6 +18,7 @@ out/
 
 run/
 /server/
+/mods/
 
 ### Eclipse ###
 .apt_generated
