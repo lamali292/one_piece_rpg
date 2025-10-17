@@ -34,7 +34,7 @@ import java.util.List;
  * @see ICombatPlayer
  * @see ISpellPlayer
  */
-@Mixin(value = SpellHotbar.class)
+@Mixin(value = SpellHotbar.class, remap = false)
 public abstract class SpellHotbarMixin {
 
     /**
@@ -70,7 +70,12 @@ public abstract class SpellHotbarMixin {
      * @param options the game options containing keybindings
      * @param cir callback info returning whether the hotbar changed
      */
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "update",
+            at = @At("HEAD"),
+            cancellable = true,
+            remap = false
+    )
     public void update(ClientPlayerEntity player, GameOptions options, CallbackInfoReturnable<Boolean> cir) {
         var changed = false;
         var initialSlotCount = onepiece$getSelf().slots.size();

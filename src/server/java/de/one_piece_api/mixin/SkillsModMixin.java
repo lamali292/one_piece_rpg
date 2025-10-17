@@ -21,12 +21,14 @@ import java.util.Optional;
 @Mixin(value = SkillsMod.class, remap = false)
 public abstract class SkillsModMixin implements ICategoryAccessor {
 
-
     @Accessor("categories")
     public abstract ChangeListener<Optional<Map<Identifier, CategoryConfig>>> getCategories();
 
-    @Inject(method = "setPoints(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/puffish/skillsmod/config/CategoryConfig;Lnet/puffish/skillsmod/server/data/CategoryData;Lnet/minecraft/util/Identifier;IZ)V",
-            at = @At("HEAD"))
+    @Inject(
+            method = "setPoints(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/puffish/skillsmod/config/CategoryConfig;Lnet/puffish/skillsmod/server/data/CategoryData;Lnet/minecraft/util/Identifier;IZ)V",
+            at = @At("HEAD"),
+            remap = false
+    )
     private void onSetPoints(ServerPlayerEntity player, CategoryConfig category,
                              CategoryData categoryData, Identifier source,
                              int count, boolean isSilent, CallbackInfo ci) {
@@ -38,7 +40,4 @@ public abstract class SkillsModMixin implements ICategoryAccessor {
             }
         }
     }
-
-
-
 }

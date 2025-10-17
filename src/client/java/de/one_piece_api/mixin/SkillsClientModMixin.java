@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
  * @see SkillsClientMod
  * @see ISkillsClientMod
  */
-@Mixin(SkillsClientMod.class)
+@Mixin(value = SkillsClientMod.class, remap = false)
 public class SkillsClientModMixin implements ISkillsClientMod {
 
     /**
@@ -62,7 +62,7 @@ public class SkillsClientModMixin implements ISkillsClientMod {
      */
     @Redirect(
             method = "setup(Lnet/puffish/skillsmod/client/setup/ClientRegistrar;Lnet/puffish/skillsmod/client/event/ClientEventReceiver;Lnet/puffish/skillsmod/client/keybinding/KeyBindingReceiver;Lnet/puffish/skillsmod/client/network/ClientPacketSender;)V",
-            at = @At(value = "INVOKE", target = "Lnet/puffish/skillsmod/client/keybinding/KeyBindingReceiver;registerKeyBinding(Lnet/minecraft/client/option/KeyBinding;Lnet/puffish/skillsmod/client/keybinding/KeyBindingHandler;)V")
+            at = @At(value = "INVOKE", target = "Lnet/puffish/skillsmod/client/keybinding/KeyBindingReceiver;registerKeyBinding(Lnet/minecraft/client/option/KeyBinding;Lnet/puffish/skillsmod/client/keybinding/KeyBindingHandler;)V"), remap = false
     )
     private static void redirectKeyBindingRegistration(KeyBindingReceiver receiver, KeyBinding keyBinding, KeyBindingHandler action) {
         // Do nothing - prevents default keybinding registration

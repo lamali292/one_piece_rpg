@@ -1,12 +1,23 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.hud.StaminaBar;
+import com.mojang.blaze3d.systems.RenderSystem;
+import de.one_piece_api.hud.HudRendererHelper;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -16,10 +27,41 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * displaying it after the mount health bar.
  *
  * @see InGameHud
- * @see StaminaBar
+ * @see HudRendererHelper
  */
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
+
+
+    @Shadow
+    @Final
+    private static Identifier AIR_TEXTURE;
+
+    @Shadow
+    @Final
+    private static Identifier AIR_BURSTING_TEXTURE;
+
+    @Shadow
+    private int ticks;
+
+    @Shadow
+    @Final
+    private MinecraftClient client;
+
+    @Shadow
+    private LivingEntity getRiddenEntity() {
+        throw new AssertionError();
+    }
+
+    @Shadow
+    private int getHeartCount(@Nullable LivingEntity entity) {
+        throw new AssertionError();
+    }
+
+    @Shadow
+    private PlayerEntity getCameraPlayer() {
+        throw new AssertionError();
+    }
 
     /**
      * Renders the stamina bar on the in-game HUD.
@@ -33,6 +75,53 @@ public class InGameHudMixin {
      */
     @Inject(method = "renderMainHud", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderMountHealth(Lnet/minecraft/client/gui/DrawContext;)V", shift = At.Shift.AFTER))
     private void renderStamina(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        StaminaBar.render(context, tickCounter);
+        LivingEntity livingEntity = this.getRiddenEntity();
+        int t = this.getHeartCount(livingEntity);
+        boolean hasFoodBar = t == 0;
+        HudRendererHelper.render(context, ticks, tickCounter, hasFoodBar);
+    }
+
+
+    @Inject(method = "renderHealthBar", at = @At("HEAD"), cancellable = true)
+    private void renderHealthBar(DrawContext context, PlayerEntity player, int x, int y, int lines, int regeneratingHeartIndex, float maxHealth, int lastHealth, int health, int absorption, boolean blinking, CallbackInfo ci) {
+        HudRendererHelper.renderHealthBar(context, player, maxHealth, lastHealth, absorption, blinking);
+        ci.cancel();
+    }
+
+    @Inject(method = "renderFood", at = @At("HEAD"), cancellable = true)
+    private void renderFood(DrawContext context, PlayerEntity player, int top, int right, CallbackInfo ci) {
+        HudRendererHelper.renderFood(context, player, top, right);
+        ci.cancel();
+    }
+
+    @ModifyVariable(method = "renderArmor", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private static int lowerArmorBar(int i) {
+        return i + 10; // Increase to lower the bar more
+    }
+
+    @Inject(method = "renderStatusBars", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", ordinal = 2), cancellable = true)
+    private void customAirRendering(DrawContext context, CallbackInfo ci) {
+        PlayerEntity playerEntity = this.getCameraPlayer();
+        int m = context.getScaledWindowWidth() / 2 + 91;
+        int n = context.getScaledWindowHeight() - 39;
+        int u = playerEntity.getMaxAir();
+        int v = Math.min(playerEntity.getAir(), u);
+        if (playerEntity.isSubmergedIn(FluidTags.WATER) || v < u) {
+            // Same level as armor
+            int x = MathHelper.ceil((double)(v - 2) * 10.0 / (double)u);
+            int y = MathHelper.ceil((double)v * 10.0 / (double)u) - x;
+            RenderSystem.enableBlend();
+            for (int z = 0; z < x + y; ++z) {
+                if (z < x) {
+                    context.drawGuiTexture(AIR_TEXTURE, m - z * 8 - 9, n, 9, 9);
+                    continue;
+                }
+                context.drawGuiTexture(AIR_BURSTING_TEXTURE, m - z * 8 - 9, n, 9, 9);
+            }
+            RenderSystem.disableBlend();
+        }
+
+        this.client.getProfiler().pop();
+        ci.cancel();
     }
 }

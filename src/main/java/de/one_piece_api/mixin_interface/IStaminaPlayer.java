@@ -8,4 +8,5 @@ public interface IStaminaPlayer {
     void onepiece$removeStamina(double stamina);
     double onepiece$getStamina();
     void onepiece$updateStamina();
+    boolean onepiece$hasStaminaBoost();
 }

@@ -14,14 +14,14 @@ import org.spongepowered.asm.mixin.Unique;
  * @see HudRenderHelper.SpellHotBarWidget.SpellViewModel
  * @see IStaminaCost
  */
-@Mixin(HudRenderHelper.SpellHotBarWidget.SpellViewModel.class)
+@Mixin(value = HudRenderHelper.SpellHotBarWidget.SpellViewModel.class, remap = false)
 public class SpellViewModelMixin implements IStaminaCost {
 
     /**
      * The stamina cost associated with this spell view model.
      */
     @Unique
-    private float stamina;
+    private float one_piece_api$stamina;
 
     /**
      * Sets the stamina cost for this spell view model.
@@ -30,7 +30,7 @@ public class SpellViewModelMixin implements IStaminaCost {
      */
     @Override
     public void onepiece$setStaminaCost(float value) {
-        this.stamina = value;
+        this.one_piece_api$stamina = value;
     }
 
     /**
@@ -40,6 +40,6 @@ public class SpellViewModelMixin implements IStaminaCost {
      */
     @Override
     public float onepiece$getStaminaCost() {
-        return this.stamina;
+        return this.one_piece_api$stamina;
     }
 }

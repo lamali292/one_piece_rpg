@@ -187,7 +187,7 @@ public class StaminaPlayerMixin implements IStaminaPlayer {
             boost_tick = 0;
         }
         stamina_tick++;
-        if (hasStaminaBoost()) {
+        if (onepiece$hasStaminaBoost()) {
             boost_tick++;
         }
     }
@@ -246,8 +246,8 @@ public class StaminaPlayerMixin implements IStaminaPlayer {
      *
      * @return true if the player is crouching, false otherwise
      */
-    @Unique
-    private boolean hasStaminaBoost() {
+    @Override
+    public boolean onepiece$hasStaminaBoost() {
         return onepiece$getStaminaSelf().isSneaking();
     }
 }

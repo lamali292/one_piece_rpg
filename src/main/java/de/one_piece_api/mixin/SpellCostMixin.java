@@ -5,7 +5,7 @@ import net.spell_engine.api.spell.Spell;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(Spell.Cost.class)
+@Mixin(value = Spell.Cost.class, remap = false)
 public class SpellCostMixin implements IStaminaCost {
     @Unique
     public float stamina;

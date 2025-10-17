@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-@Mixin(SpellContainerSource.class)
+@Mixin(value = SpellContainerSource.class, remap = false)
 public class SpellContainerSourceMixin {
 
     @Shadow
@@ -26,7 +26,7 @@ public class SpellContainerSourceMixin {
 
     }
 
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "update", at = @At("HEAD"), cancellable = true, remap = false)
     private static void update(PlayerEntity player, CallbackInfo ci) {
         var owner = (SpellContainerSource.Owner) player;
         var allContainers = new ArrayList<SpellContainerSource.SourcedContainer>();

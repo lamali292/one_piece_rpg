@@ -761,7 +761,8 @@ public class OnePieceScreen extends GenericTabbedScreen {
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
         ScreenPosition screenPos = getScreenPosition();
-
+        this.applyBlur(delta);
+        this.renderDarkening(context);
         RenderSystem.enableBlend();
         try {
             renderMainBackground(context, screenPos);
