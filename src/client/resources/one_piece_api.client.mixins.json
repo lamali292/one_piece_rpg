@@ -15,7 +15,8 @@
     "SkillsClientModMixin",
     "SpellHotbarMixin",
     "HudMessagesMixin",
-    "SpellViewModelMixin"
+    "SpellViewModelMixin",
+    "SpellHotBarWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * @see StyledConnection
  * @see IHidden
  */
-@Mixin(ShowCategoryInPacket.class)
+@Mixin(value = ShowCategoryInPacket.class, remap = false)
 public class ShowCategoryInPacketMixin {
 
     /**
@@ -36,7 +36,7 @@ public class ShowCategoryInPacketMixin {
     @Inject(
             method = "readSkillConnection",
             at = @At("RETURN"),
-            remap = false
+            remap = true  // Method signature contains PacketByteBuf (Minecraft class)
     )
     private static void readSkillConnection(PacketByteBuf buf, CallbackInfoReturnable<ClientSkillConnectionConfig> cir) {
         ClientSkillConnectionConfig connection = cir.getReturnValue();
@@ -59,7 +59,7 @@ public class ShowCategoryInPacketMixin {
     @Inject(
             method = "readSkill",
             at = @At("RETURN"),
-            remap = false
+            remap = true  // Method signature contains PacketByteBuf (Minecraft class)
     )
     private static void readSkill(PacketByteBuf buf, CallbackInfoReturnable<ClientSkillConfig> cir) {
         ClientSkillConfig connection = cir.getReturnValue();

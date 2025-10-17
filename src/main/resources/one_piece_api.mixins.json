@@ -2,7 +2,7 @@
   "required": true,
   "package": "de.one_piece_api.mixin",
   "compatibilityLevel": "JAVA_21",
-  "refmap": "one_piece_api.refmap.json",
+  "refmap": "one_piece_rpg-refmap.json",
   "mixins": [
     "ClassPlayerMixin",
     "CombatPlayerMixin",

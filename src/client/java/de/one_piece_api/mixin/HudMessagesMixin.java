@@ -32,7 +32,7 @@ public class HudMessagesMixin {
      * @param attempt the spell cast attempt containing the failure reason
      * @param ci callback info from the mixin injection, used to cancel default behavior
      */
-    @Inject(method = "castAttemptError", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "castAttemptError", at = @At("HEAD"), cancellable = true, remap = false)
     private void handleStaminaError(SpellCast.Attempt attempt, CallbackInfo ci) {
         if (attempt.result().toString().equals("INSUFFICIENT_STAMINA")) {
             MutableText message = Text.translatable("hud.cast_attempt_error.insufficient_stamina")

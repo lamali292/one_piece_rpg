@@ -1,12 +1,13 @@
 // ----- Mod and Resourcepack for Server ------
-import org.gradle.BuildListener
-import org.gradle.BuildResult
+import org.gradle.api.tasks.bundling.Zip
+import org.gradle.api.tasks.Copy
 
-val contentJar = tasks.named<Jar>("contentJar")
+// Reference the REMAPPED content jar
+val contentJar = tasks.named("remapContentJar")
 
 tasks.register<Copy>("prepareRunClientMods") {
     dependsOn(contentJar)
-    from(contentJar.flatMap { it.archiveFile })
+    from(contentJar.map { it.outputs.files })
     into("$rootDir/server/mods")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
@@ -45,7 +46,6 @@ tasks.register<Zip>("buildResourcePack") {
     outputs.upToDateWhen { false }
 }
 
-
 tasks.register<Zip>("buildDatapack") {
     archiveFileName.set("content_data.zip")
     destinationDirectory.set(file("$rootDir/server/world/datapacks"))
@@ -77,7 +77,6 @@ tasks.register<Zip>("buildDatapack") {
     outputs.upToDateWhen { false }
 }
 
-
 tasks.register("updateDatapack") {
     dependsOn("runDatagen2")
 
@@ -93,10 +92,6 @@ tasks.register("prepareServer") {
     group = "build"
     description = "Prepares both server mods and resource pack"
 }
-
-
-
-
 
 // --------------------- Python HTTP Server ---------------------
 tasks.register("httpServer") {
@@ -129,7 +124,7 @@ tasks.register("httpServer") {
 
 // Attach to server run
 tasks.named("runServer") {
-    dependsOn("contentJar")
+    dependsOn("remapContentJar")
     dependsOn("prepareServer")
     //dependsOn("httpServer")
     doLast {

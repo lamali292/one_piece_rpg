@@ -3,6 +3,7 @@ package de.one_piece_api.event;
 import de.one_piece_api.ClassRewardHandler;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.DevilFruitConfig;
+import de.one_piece_api.config.XpTimeConfig;
 import de.one_piece_api.data.experience.ItemExperienceSource;
 import de.one_piece_api.data.experience.TimeExperienceSource;
 import de.one_piece_api.data.loader.CategoryLoader;
@@ -13,6 +14,7 @@ import de.one_piece_api.init.MyDataComponentTypes;
 import de.one_piece_api.mixin_interface.IClassPlayer;
 import de.one_piece_api.mixin_interface.IDevilFruitPlayer;
 import de.one_piece_api.mixin_interface.IStaminaPlayer;
+import de.one_piece_api.mixin_interface.IXpPlayer;
 import de.one_piece_api.network.payload.DevilFruitPayload;
 import de.one_piece_api.network.payload.SyncStylesPayload;
 import de.one_piece_api.util.OnePieceCategory;
@@ -143,23 +145,49 @@ public class ServerEvents {
             staminaPlayer.onepiece$updateStamina();
         }
 
-        if (currentTicks >= TICKS_PER_HOUR) {
-            // Give XP every hour
-            player.sendMessage(Text.of("You received 50 XP because you were 1h on server"), false);
-            SkillsAPI.updateExperienceSources(
-                    player,
-                    TimeExperienceSource.class,
-                    experienceSource -> experienceSource.getValue(player, 50)
-            );
-            playerTickCounters.put(playerId, 0);
-        } else {
-            playerTickCounters.put(playerId, currentTicks);
+        // Handle new XP time system
+        if (player instanceof IXpPlayer xpPlayer) {
+            handleXpTimeTick(player, xpPlayer);
         }
+
 
         ScreenHandler currentHandler = player.currentScreenHandler;
         if (currentHandler != null && !trackedHandlers.containsKey(currentHandler)) {
             addListenerToHandler(player, currentHandler);
             trackedHandlers.put(currentHandler, true);
+        }
+    }
+
+    /**
+     * Handles time-based XP gain with per-player configuration and AFK detection
+     */
+    private static void handleXpTimeTick(ServerPlayerEntity player, IXpPlayer xpPlayer) {
+        // Check if player is AFK
+        if (xpPlayer.onepiece$isAfk()) {
+            return; // Don't give XP to AFK players
+        }
+
+        XpTimeConfig config = xpPlayer.onepiece$getXpTimeConfig();
+        int currentTicks = xpPlayer.onepiece$getTicksSinceLastXp();
+        currentTicks++;
+
+        if (currentTicks >= config.getIntervalTicks()) {
+
+            // Notify player
+            String message = "§e[Time Reward] §a+" + config.getXpAmount() + " XP";
+            player.sendMessage(Text.literal(message), false);
+
+            // Also give XP through the skills system for compatibility
+            SkillsAPI.updateExperienceSources(
+                    player,
+                    TimeExperienceSource.class,
+                    experienceSource -> experienceSource.getValue(player, config.getXpAmount())
+            );
+
+            // Reset timer
+            xpPlayer.onepiece$resetXpTimer();
+        } else {
+            xpPlayer.onepiece$setTicksSinceLastXp(currentTicks);
         }
     }
 

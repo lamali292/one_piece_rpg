@@ -27,8 +27,10 @@ public class SpellHelperMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/entity/player/PlayerEntity;addExhaustion(F)V",
-                    shift = At.Shift.AFTER
-            )
+                    shift = At.Shift.AFTER,
+                    remap = true  // This target IS Minecraft, so it needs remapping
+            ),
+            remap = false  // But the overall injection doesn't
     )
     private static void addStaminaCost(
             PlayerEntity player,
@@ -65,9 +67,10 @@ public class SpellHelperMixin {
     }
 
     @Inject(
-            method = "attemptCasting*",
-            at = @At("RETURN"),
-            cancellable = true
+            method = "attemptCasting(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Identifier;Z)Lnet/spell_engine/internals/casting/SpellCast$Attempt;",
+            at = @At(value = "RETURN"),
+            cancellable = true,
+            remap = false
     )
     private static void checkStamina(
             PlayerEntity player,
@@ -97,5 +100,4 @@ public class SpellHelperMixin {
             }
         }
     }
-
 }

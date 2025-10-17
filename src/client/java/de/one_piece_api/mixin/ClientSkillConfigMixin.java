@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Unique;
  * This mixin implements the {@link IHidden} interface, allowing skill configurations
  * to be marked as hidden in the UI.
  */
-@Mixin(ClientSkillConfig.class)
+@Mixin(value = ClientSkillConfig.class, remap = false)
 public class ClientSkillConfigMixin implements IHidden {
 
     /**

@@ -26,7 +26,6 @@ loom {
     splitEnvironmentSourceSets()
 }
 
-
 val sourceSets = the<SourceSetContainer>()
 
 sourceSets {
@@ -63,8 +62,6 @@ sourceSets {
         runtimeClasspath += main.runtimeClasspath + main.output
         compileClasspath += server.compileClasspath + server.output
         runtimeClasspath += server.runtimeClasspath + server.output
-
-
     }
 }
 
@@ -91,7 +88,6 @@ loom {
             programArgs("--username", "FabricDev")
             runDir = "run"
             vmArgs("-javaagent:C:/Users/lamal/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.16.3+mixin.0.8.7/3e535042688d1265447e52ad86950b7d9678a5fa/sponge-mixin-0.16.3+mixin.0.8.7.jar")
-
         }
 
         runs.getByName("server") {
@@ -121,7 +117,6 @@ loom {
             configName = "Fabric Datagen (Content)"
             runDir = "build/datagen2"
             source(sourceSets["content"])
-            //source(sourceSets["main"])
             vmArg("-Dfabric-api.datagen")
             vmArg("-Dfabric-api.datagen.output-dir=${file("src/content/generated")}")
             vmArg("-Dfabric-api.datagen.modid=one_piece_content")
@@ -132,13 +127,6 @@ loom {
 tasks.withType<ProcessResources>().configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
-
-
-
-/*tasks.named("runClient") {
-    dependsOn("prepareRunClientMods") // Ensure the content is copied before running
-}*/
-
 
 // --------------------- Dependencies ---------------------
 dependencies {
@@ -166,7 +154,6 @@ dependencies {
     modRuntimeOnly("curse.maven:modmenu-308702:5810603")
 }
 
-
 tasks.named<ProcessResources>("processResources") {
     from(sourceSets["main"].resources.srcDirs) {
         include("fabric.mod.json")
@@ -183,8 +170,6 @@ tasks.withType<Jar>().configureEach {
     }
 }
 
-apply(from = "jar.gradle.kts")
-
 // --------------------- Java ---------------------
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -195,4 +180,123 @@ tasks.withType<JavaCompile>().configureEach {
     options.release.set(21)
 }
 
+// --------------------- Resource Processing ---------------------
+val clientResourcesDir = layout.buildDirectory.dir("processedResources/client")
+val serverResourcesDir = layout.buildDirectory.dir("processedResources/server")
+
+tasks.register<Copy>("precalcClientResources") {
+    from("src/client/resources") {
+        include("**/*")
+    }
+    from("src/main/resources") {
+        include("assets/**")
+        include("one_piece_api.mixins.json")
+    }
+    from("src/main/generated") {
+        include("assets/**")
+    }
+
+    inputs.property("version", project.version)
+
+    filesMatching("fabric.mod.json") {
+        expand("version" to project.version)
+    }
+
+    into(clientResourcesDir)
+}
+
+tasks.register<Copy>("precalcServerResources") {
+    from("src/server/resources") {
+        include("**/*")
+    }
+    from("src/main/resources") {
+        include("data/**")
+        include("one_piece_api.mixins.json")
+        include("assets/one_piece_api/icon.png")
+    }
+    from("src/main/generated") {
+        include("data/**")
+    }
+
+    inputs.property("version", project.version)
+
+    filesMatching("fabric.mod.json") {
+        expand("version" to project.version)
+    }
+
+    into(serverResourcesDir)
+}
+
+// --------------------- JAR Tasks (Unremapped) ---------------------
+val clientJarUnmapped = tasks.register<Jar>("clientJarUnmapped") {
+    archiveBaseName.set(findProperty("archives_base_name") as String + "-client")
+    archiveClassifier.set("dev")
+    from(sourceSets["client"].output.classesDirs)
+    from(sourceSets["main"].output.classesDirs)
+    dependsOn("precalcClientResources")
+    from(clientResourcesDir)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+val serverJarUnmapped = tasks.register<Jar>("serverJarUnmapped") {
+    archiveBaseName.set(findProperty("archives_base_name") as String + "-server")
+    archiveClassifier.set("dev")
+    from(sourceSets["server"].output.classesDirs)
+    from(sourceSets["main"].output.classesDirs)
+    dependsOn("precalcServerResources")
+    from(serverResourcesDir)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+val contentJarUnmapped = tasks.register<Jar>("contentJarUnmapped") {
+    archiveBaseName.set(findProperty("archives_base_name") as String + "-content")
+    archiveClassifier.set("dev")
+    from(sourceSets["content"].output.classesDirs)
+    from(fileTree("src/content/resources")) {
+        include("fabric.mod.json")
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// --------------------- Remapped JAR Tasks ---------------------
+val remapClientJar = tasks.register<net.fabricmc.loom.task.RemapJarTask>("remapClientJar") {
+    dependsOn(clientJarUnmapped)
+    inputFile.set(clientJarUnmapped.get().archiveFile)
+    archiveBaseName.set(findProperty("archives_base_name") as String + "-client")
+    addNestedDependencies.set(true)
+}
+
+val remapServerJar = tasks.register<net.fabricmc.loom.task.RemapJarTask>("remapServerJar") {
+    dependsOn(serverJarUnmapped)
+    inputFile.set(serverJarUnmapped.get().archiveFile)
+    archiveBaseName.set(findProperty("archives_base_name") as String + "-server")
+    addNestedDependencies.set(true)
+}
+
+val remapContentJar = tasks.register<net.fabricmc.loom.task.RemapJarTask>("remapContentJar") {
+    dependsOn(contentJarUnmapped)
+    inputFile.set(contentJarUnmapped.get().archiveFile)
+    archiveBaseName.set(findProperty("archives_base_name") as String + "-content")
+    addNestedDependencies.set(true)
+}
+
+// --------------------- Convenience Tasks ---------------------
+tasks.register("clientJar") {
+    dependsOn(remapClientJar)
+}
+
+tasks.register("serverJar") {
+    dependsOn(remapServerJar)
+}
+
+tasks.register("contentJar") {
+    dependsOn(remapContentJar)
+}
+
+// --------------------- Default Build ---------------------
+tasks.named("build") {
+    dependsOn(remapClientJar, remapServerJar, remapContentJar)
+}
+
+// --------------------- Server Tasks (Must be last) ---------------------
 apply(from = "server.gradle.kts")
