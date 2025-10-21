@@ -14,8 +14,8 @@ public record ClassConfigPayload(Map<Identifier, ClassConfig> configMap) impleme
     public static final CustomPayload.Id<ClassConfigPayload> TYPE = new Id<>(OnePieceRPG.id("class_config"));
 
     public static PacketCodec<PacketByteBuf, ClassConfigPayload> STREAM_CODEC = PacketCodec.of(
-            (cla, buf) -> MyCodecs.CLASS_CONFIG_MAP.encode(buf, cla.configMap()),
-            buf -> new ClassConfigPayload(MyCodecs.CLASS_CONFIG_MAP.decode(buf))
+            (cla, buf) -> ClassConfig.MAP_CODEC.encode(buf, cla.configMap()),
+            buf -> new ClassConfigPayload(ClassConfig.MAP_CODEC.decode(buf))
     );
 
     @Override

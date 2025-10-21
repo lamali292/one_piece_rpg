@@ -1,5 +1,6 @@
 package de.one_piece_content_data.content;
 
+import de.one_piece_api.mixin_interface.SkillType;
 import de.one_piece_content.ExampleMod;
 import de.one_piece_api.config.skill.SkillTreeEntryConfig;
 import de.one_piece_content_data.registry.Registries;
@@ -70,11 +71,14 @@ public class ExampleSkills {
     }
 
     /**
-     * Registers a skill's position in the skill tree.
+     * Registers a skill's position in the skill tree with default type.
      * <p>
-     * Adds a new skill entry to the tree with its position and root status.
+     * This is a convenience method that calls {@link #register(Identifier, boolean, int, int, SkillType)}
+     * with the default type {@link SkillType#SKILL_TREE}.
+     * <p>
      * The skill will be rendered at the specified coordinates in the skill
-     * tree viewport.
+     * tree viewport. Root skills serve as starting points for skill paths,
+     * while non-root skills require prerequisites to unlock.
      *
      * @param skillId the skill definition identifier
      * @param isRoot {@code true} if this is a root skill (starting point of a path),
@@ -83,7 +87,28 @@ public class ExampleSkills {
      * @param y the y-coordinate in the skill tree viewport (negative = up, positive = down)
      */
     public static void register(Identifier skillId, boolean isRoot, int x, int y) {
-        SKILL_TREE_ENTRIES.add(new SkillTreeEntryConfig(skillId, isRoot, x, y));
+        register(skillId, isRoot, x, y, SkillType.SKILL_TREE);
+    }
+
+
+    /**
+     * Registers a skill's position in the skill tree with a specified type.
+     * <p>
+     * Adds a new skill entry to the tree with its position, root status, and entry type.
+     * The skill will be rendered at the specified coordinates in the skill tree viewport.
+     * <p>
+     * The entry type determines how the skill is displayed and behaves within the skill tree UI.
+     *
+     * @param skillId the skill definition identifier
+     * @param isRoot {@code true} if this is a root skill (starting point of a path),
+     *               {@code false} if it requires prerequisites
+     * @param x the x-coordinate in the skill tree viewport (negative = left, positive = right)
+     * @param y the y-coordinate in the skill tree viewport (negative = up, positive = down)
+     * @param type the entry type defining how this skill is displayed in the tree
+     * @see SkillType
+     */
+    public static void register(Identifier skillId, boolean isRoot, int x, int y, SkillType type) {
+        SKILL_TREE_ENTRIES.add(new SkillTreeEntryConfig(skillId, isRoot, x, y, type));
     }
 
     /**

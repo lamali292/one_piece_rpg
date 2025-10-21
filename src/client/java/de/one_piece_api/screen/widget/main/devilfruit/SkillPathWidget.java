@@ -1,4 +1,4 @@
-package de.one_piece_api.screen.widget;
+package de.one_piece_api.screen.widget.main.devilfruit;
 
 import de.one_piece_api.screen.OnePieceScreen;
 import de.one_piece_api.util.OnePieceCategory;
@@ -21,6 +21,7 @@ import net.puffish.skillsmod.client.SkillsClientMod;
 import net.puffish.skillsmod.client.config.ClientCategoryConfig;
 import net.puffish.skillsmod.client.config.ClientIconConfig;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
+import net.puffish.skillsmod.client.data.ClientCategoryData;
 import net.puffish.skillsmod.client.network.packets.out.SkillClickOutPacket;
 import net.puffish.skillsmod.client.rendering.ItemBatchedRenderer;
 import net.puffish.skillsmod.client.rendering.TextureBatchedRenderer;
@@ -291,12 +292,14 @@ public class SkillPathWidget implements Drawable, Element {
      * @return the index of the current skill (0-based)
      */
     private int getCurrentSkillIndex() {
+        ClientCategoryData categoryData = parent.getCategoryData();
+        if (categoryData == null || skillConfig == null) return 0;
         for (int i = 0; i < pathSkillIds.size(); i++) {
             String skillId = pathSkillIds.get(i);
             ClientSkillConfig skill = skillConfig.get(skillId);
             if (skill == null) continue;
 
-            Skill.State state = parent.getCategoryData().getSkillState(skill);
+            Skill.State state = categoryData.getSkillState(skill);
             if (state == Skill.State.AFFORDABLE || state == Skill.State.AVAILABLE) {
                 return i;
             }

@@ -1,6 +1,7 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.mixin_interface.IHidden;
+import de.one_piece_api.mixin_interface.ISkillTypeProvider;
+import de.one_piece_api.mixin_interface.SkillType;
 import de.one_piece_api.mixin_interface.StyledConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.puffish.skillsmod.client.config.skill.ClientSkillConfig;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * @see ShowCategoryInPacket
  * @see StyledConnection
- * @see IHidden
+ * @see ISkillTypeProvider
  */
 @Mixin(value = ShowCategoryInPacket.class, remap = false)
 public class ShowCategoryInPacketMixin {
@@ -63,8 +64,8 @@ public class ShowCategoryInPacketMixin {
     )
     private static void readSkill(PacketByteBuf buf, CallbackInfoReturnable<ClientSkillConfig> cir) {
         ClientSkillConfig connection = cir.getReturnValue();
-        boolean isHidden = buf.readBoolean();
-        ((IHidden) (Object) connection).onepiece$setHidden(isHidden);
+        SkillType isHidden = buf.readEnumConstant(SkillType.class);
+        ((ISkillTypeProvider) (Object) connection).onepiece$setSkillType(isHidden);
     }
 
 }

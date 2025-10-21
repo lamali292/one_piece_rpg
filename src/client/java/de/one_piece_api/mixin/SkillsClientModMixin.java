@@ -1,14 +1,21 @@
 package de.one_piece_api.mixin;
 
+import de.one_piece_api.network.ClientPacketHandler;
+import de.one_piece_api.util.ClientData;
 import de.one_piece_api.util.ISkillsClientMod;
 import net.minecraft.client.option.KeyBinding;
 import net.puffish.skillsmod.client.SkillsClientMod;
 import net.puffish.skillsmod.client.data.ClientSkillScreenData;
 import net.puffish.skillsmod.client.keybinding.KeyBindingHandler;
 import net.puffish.skillsmod.client.keybinding.KeyBindingReceiver;
+import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
+import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
+import net.puffish.skillsmod.client.network.packets.in.SkillUpdateInPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.lang.reflect.Field;
 
@@ -66,5 +73,22 @@ public class SkillsClientModMixin implements ISkillsClientMod {
     )
     private static void redirectKeyBindingRegistration(KeyBindingReceiver receiver, KeyBinding keyBinding, KeyBindingHandler action) {
         // Do nothing - prevents default keybinding registration
+    }
+
+
+
+    @Inject(method = "onPointsUpdatePacket", at = @At("TAIL"), remap = false)
+    private void onPointsUpdatePacket(PointsUpdateInPacket packet, CallbackInfo ci) {
+        ClientPacketHandler.handlePointsUpdate(packet);
+    }
+
+    @Inject(method = "onExperienceUpdatePacket", at = @At("TAIL"), remap = false)
+    private void onExperienceUpdatePacket(ExperienceUpdateInPacket packet, CallbackInfo ci) {
+        ClientPacketHandler.handleExperienceUpdate(packet);
+    }
+
+    @Inject(method = "onSkillUpdatePacket", at = @At("TAIL"), remap = false)
+    private void onSkillUpdatePacket(SkillUpdateInPacket packet, CallbackInfo ci) {
+        ClientPacketHandler.handleSkillUpdate(packet);
     }
 }

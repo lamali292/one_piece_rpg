@@ -1,4 +1,4 @@
-package de.one_piece_api.screen.widget;
+package de.one_piece_api.screen.widget.main;
 
 import de.one_piece_api.init.MyFonts;
 import net.minecraft.client.font.TextRenderer;

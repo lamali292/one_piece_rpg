@@ -1,6 +1,8 @@
 package de.one_piece_api.config.skill;
 
 
+import de.one_piece_api.mixin_interface.ISkillTypeProvider;
+import de.one_piece_api.mixin_interface.SkillType;
 import de.one_piece_api.util.DataGenUtil;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.config.ConfigContext;
@@ -12,18 +14,19 @@ import net.puffish.skillsmod.api.util.Result;
 import net.puffish.skillsmod.config.skill.SkillConfig;
 import net.puffish.skillsmod.config.skill.SkillsConfig;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public record SkillTreeEntryConfig(Identifier definition, boolean isRoot, int x, int y) {
+public record SkillTreeEntryConfig(Identifier definition, boolean isRoot, int x, int y, SkillType type)  {
+
+
     public static Result<SkillsConfig, Problem> parse(JsonElement jsonElement, ConfigContext configContext) {
         return parseArray(jsonElement).mapSuccess(c->{
             Map<String, SkillConfig> map = new HashMap<>();
             c.forEach(e->{
                 String id = DataGenUtil.generateDeterministicId(e.definition());
-                map.put(id, new SkillConfig(id, e.x(), e.y(), e.definition().toString(), e.isRoot()));
+                SkillConfig skill = new SkillConfig(id, e.x(), e.y(), e.definition().toString(), e.isRoot());
+                ((ISkillTypeProvider) (Object) skill).onepiece$setSkillType(e.type());
+                map.put(id, skill);
             });
             return new SkillsConfig(map);
         });
@@ -68,6 +71,11 @@ public record SkillTreeEntryConfig(Identifier definition, boolean isRoot, int x,
                 .andThen(JsonElement::getAsInt)
                 .ifFailure(problems::add);
 
+        var typeResult = rootObject.get("type")
+                .andThen(JsonElement::getAsString)
+                .ifFailure(problems::add)
+                .mapSuccess(SkillType::getType);
+
         if (!problems.isEmpty()) {
             return Result.failure(Problem.combine(problems));
         }
@@ -76,7 +84,8 @@ public record SkillTreeEntryConfig(Identifier definition, boolean isRoot, int x,
                 definitionResult.getSuccess().orElseThrow(),
                 isRoot,
                 xResult.getSuccess().orElseThrow(),
-                yResult.getSuccess().orElseThrow()
+                yResult.getSuccess().orElseThrow(),
+                typeResult.getSuccess().orElseThrow()
         ));
     }
 

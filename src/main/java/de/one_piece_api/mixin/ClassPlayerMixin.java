@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerEntity.class)
 public class ClassPlayerMixin implements IClassPlayer {
 
-
     @Unique
     private static final TrackedData<String> ONE_PIECE_CLASS =
             DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.STRING);
@@ -26,16 +25,18 @@ public class ClassPlayerMixin implements IClassPlayer {
         return (PlayerEntity) (Object) this;
     }
 
-    // --- initDataTracker Injection ---
     @Inject(method = "initDataTracker", at = @At("TAIL"))
     private void onepiece$initTrackedClassData(DataTracker.Builder builder, CallbackInfo ci) {
         builder.add(ONE_PIECE_CLASS, "");
     }
 
-
     @Override
     public Identifier onepiece$getOnePieceClass() {
-        return Identifier.of(onepiece$getClassSelf().getDataTracker().get(ONE_PIECE_CLASS));
+        String value = onepiece$getClassSelf().getDataTracker().get(ONE_PIECE_CLASS);
+        if (value == null || value.isEmpty()) {
+            return Identifier.ofVanilla("empty");
+        }
+        return Identifier.of(value);
     }
 
     @Override
@@ -43,16 +44,15 @@ public class ClassPlayerMixin implements IClassPlayer {
         onepiece$getClassSelf().getDataTracker().set(ONE_PIECE_CLASS, className.toString());
     }
 
-    // --- NBT Save ---
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void onepiece$saveClassData(NbtCompound nbt, CallbackInfo ci) {
         nbt.putString("OnePieceClass", onepiece$getOnePieceClass().toString());
     }
 
-
-    // --- NBT Load ---
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     private void onepiece$loadClassData(NbtCompound nbt, CallbackInfo ci) {
-        onepiece$setOnePieceClass(Identifier.of(nbt.getString("OnePieceClass")));
+        if (nbt.contains("OnePieceClass")) {
+            onepiece$setOnePieceClass(Identifier.of(nbt.getString("OnePieceClass")));
+        }
     }
 }

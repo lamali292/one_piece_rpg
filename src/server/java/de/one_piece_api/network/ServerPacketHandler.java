@@ -1,5 +1,6 @@
 package de.one_piece_api.network;
 
+import de.one_piece_api.ClassRewardHandler;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_api.data.loader.DataLoaders;
@@ -98,6 +99,7 @@ public class ServerPacketHandler {
             switch (uiPayload.ui()) {
                 case "reset" -> {
                     SkillHelper.respec(player);
+                    ClassRewardHandler.refreshRewards(player);
                     ParticleHelper.sendBatches(player, RESET_PARTICLES);
                     context.responseSender().sendPacket(uiPayload);
                 }

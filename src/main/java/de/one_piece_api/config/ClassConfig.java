@@ -1,6 +1,11 @@
 package de.one_piece_api.config;
 
+import com.mojang.serialization.Codec;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.api.config.ConfigContext;
 import net.puffish.skillsmod.api.json.BuiltinJson;
@@ -8,11 +13,10 @@ import net.puffish.skillsmod.api.json.JsonElement;
 import net.puffish.skillsmod.api.json.JsonObject;
 import net.puffish.skillsmod.api.util.Problem;
 import net.puffish.skillsmod.api.util.Result;
+import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
 import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Configuration for a character class with level-based rewards.
@@ -43,7 +47,7 @@ public record ClassConfig(
      * @param level the level at which this reward is granted
      * @param reward the reward configuration to grant
      */
-    public record LevelReward(int level, SkillRewardConfig reward) {
+    public record LevelReward(int level, Identifier reward) {
         /**
          * Creates a new level-gated reward.
          *
@@ -59,7 +63,40 @@ public record ClassConfig(
                 throw new IllegalArgumentException("Reward cannot be null");
             }
         }
+
+        public static final PacketCodec<PacketByteBuf, LevelReward> CODEC = PacketCodec.tuple(
+                PacketCodecs.INTEGER,
+                LevelReward::level,
+                Identifier.PACKET_CODEC,
+                LevelReward::reward,
+                LevelReward::new
+        );
+
+        public static final PacketCodec<PacketByteBuf, List<LevelReward>> LIST_CODEC = PacketCodecs.collection(
+                ArrayList::new,
+                CODEC
+        );
     }
+
+    public static final PacketCodec<PacketByteBuf, ClassConfig> CODEC = PacketCodec.tuple(
+            TextCodecs.PACKET_CODEC,
+            ClassConfig::name,
+            TextCodecs.PACKET_CODEC,
+            ClassConfig::description,
+            LevelReward.LIST_CODEC,
+            ClassConfig::rewards,
+            Identifier.PACKET_CODEC,
+            ClassConfig::backTexture,
+            Identifier.PACKET_CODEC,
+            ClassConfig::nameTexture,
+            ClassConfig::new
+    );
+
+    public static final PacketCodec<PacketByteBuf, Map<Identifier, ClassConfig>> MAP_CODEC = PacketCodecs.map(
+            HashMap::new,
+            Identifier.PACKET_CODEC,
+            ClassConfig.CODEC
+    );
 
     /**
      * Parses a ClassConfig from a JSON element.
@@ -83,25 +120,15 @@ public record ClassConfig(
      *   "rewards": [
      *     {
      *       "level": 5,
-     *       "reward": {
-     *         "type": "one_piece_api:passive_ability",
-     *         "data": {
-     *           "abilities": ["one_piece_content:sword_mastery"]
-     *         }
-     *       }
+     *       "reward": "<mod_id>:reward_5"
      *     },
      *     {
      *       "level": 10,
-     *       "reward": {
-     *         "type": "one_piece_api:passive_ability",
-     *         "data": {
-     *           "abilities": ["one_piece_content:advanced_sword_mastery"]
-     *         }
-     *       }
+     *       "reward": "<mod_id>:reward_10"
      *     }
      *   ],
-     *   "backTexture": "one_piece:textures/class/swordsman_bg.png",
-     *   "nameTexture": "one_piece:textures/class/swordsman_name.png"
+     *   "backTexture": "<mod_id>:textures/class/swordsman_bg.png",
+     *   "nameTexture": "<mod_id>:textures/class/swordsman_name.png"
      * }
      * }</pre>
      *
@@ -141,10 +168,10 @@ public record ClassConfig(
                                             .getSuccess();
 
                                     // Parse reward using SkillRewardConfig parser (required)
-                                    Optional<SkillRewardConfig> optReward = rewardObj.get("reward")
-                                            .andThen(rewardElem -> SkillRewardConfig.parse(rewardElem, context))
-                                            .ifFailure(rewardProblems::add)
-                                            .getSuccess();
+                                    Optional<Identifier> optReward = rewardObj.getString("reward")
+                                            .ifFailure(problems::add)
+                                            .getSuccess()
+                                            .map(Identifier::of);
 
                                     if (!rewardProblems.isEmpty()) {
                                         return Result.failure(Problem.combine(rewardProblems));

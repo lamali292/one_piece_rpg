@@ -3,11 +3,12 @@ package de.one_piece_api;
 import de.one_piece_api.config.ClassConfig;
 import de.one_piece_api.data.loader.DataLoaders;
 import de.one_piece_api.mixin_interface.IClassPlayer;
+import de.one_piece_api.util.DataGenUtil;
 import de.one_piece_api.util.OnePieceCategory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.puffish.skillsmod.SkillsMod;
-import net.puffish.skillsmod.impl.rewards.RewardUpdateContextImpl;
+import net.puffish.skillsmod.config.skill.SkillDefinitionConfig;
 
 import java.util.List;
 
@@ -70,9 +71,12 @@ public class ClassRewardHandler {
                 rewards.size(), player.getName().getString(), classID);
 
         for (var reward : rewards) {
-            var rewardInstance = reward.reward().instance();
-            var context = new RewardUpdateContextImpl(player, 0, true); // amount 0 → remove
-            rewardInstance.update(context);
+            SkillDefinitionConfig skillDefinitionConfig = DataLoaders.SKILL_DEFINITION_LOADER.getItems().get(reward.reward());
+            if (skillDefinitionConfig == null) {
+                continue;
+            }
+            String id = DataGenUtil.generateDeterministicId(Identifier.of(skillDefinitionConfig.id()));
+            SkillsMod.getInstance().lockSkill(player, OnePieceCategory.ID, id);
             OnePieceRPG.debug(OnePieceRPG.CLASS_REWARD_HANDLER,"Removed reward at level {} for player {}",
                     reward.level(), player.getName().getString());
         }
@@ -108,10 +112,12 @@ public class ClassRewardHandler {
             if (level >= requiredLevel) {
                 OnePieceRPG.debug(OnePieceRPG.CLASS_REWARD_HANDLER, "Applying reward (requiredLevel = {}, playerLevel = {}) for player {}",
                         requiredLevel, level, player.getName().getString());
-
-                var rewardInstance = reward.reward().instance();
-                var context = new RewardUpdateContextImpl(player, 1, false);
-                rewardInstance.update(context);
+                SkillDefinitionConfig skillDefinitionConfig = DataLoaders.SKILL_DEFINITION_LOADER.getItems().get(reward.reward());
+                if (skillDefinitionConfig == null) {
+                    continue;
+                }
+                String id = DataGenUtil.generateDeterministicId(Identifier.of(skillDefinitionConfig.id()));
+                SkillsMod.getInstance().tryUnlockSkill(player, OnePieceCategory.ID, id, true);
             } else {
                 OnePieceRPG.debug(OnePieceRPG.CLASS_REWARD_HANDLER, "Skipping reward (requiredLevel = {}, playerLevel = {}) for player {}",
                         requiredLevel, level, player.getName().getString());

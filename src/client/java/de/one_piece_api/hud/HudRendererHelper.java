@@ -230,6 +230,7 @@ public class HudRendererHelper {
                 staminaText,
                 SCREEN_OFFSET_X + BAR_VERTICAL_OFFSET,
                 staminaBarPositionY,
+                COLOR_WHITE,
                 false
         );
         RenderSystem.disableBlend();
@@ -263,8 +264,11 @@ public class HudRendererHelper {
     ) {
         RenderSystem.enableBlend();
         MinecraftClient client = MinecraftClient.getInstance();
-        HeartType heartType = HeartType.fromPlayerState(player);
 
+        HeartType heartType = HeartType.fromPlayerState(player);
+        if (absorptionAmount > 0 && heartType == HeartType.NORMAL) {
+            heartType = HeartType.ABSORBING;
+        }
         // Render icon container frame
         drawContext.drawTexture(
                 TEXTURE_BAR_FRAME_SHORT,
@@ -396,42 +400,16 @@ public class HudRendererHelper {
             float maxHealth,
             int absorptionAmount
     ) {
-        String healthText = String.format("%d / %.0f", displayedHealth, maxHealth);
-        Text formattedHealthText = Text.literal(healthText)
-                .setStyle(Style.EMPTY.withFont(MyFonts.MONTSERRAT));
-        int healthTextWidth = client.textRenderer.getWidth(formattedHealthText);
-
+        String healthText = String.format("%d / %.0f", displayedHealth + absorptionAmount, maxHealth);
         renderBarText(
                 drawContext,
                 client,
                 healthText,
                 SCREEN_OFFSET_X + BAR_VERTICAL_OFFSET,
                 SCREEN_OFFSET_Y,
+                absorptionAmount > 0 ? COLOR_YELLOW : COLOR_WHITE,
                 false
         );
-
-        // Render absorption text (if present)
-        if (absorptionAmount > 0) {
-            String absorptionText = String.format("(+%d)", absorptionAmount);
-            Text formattedAbsorptionText = Text.literal(absorptionText)
-                    .setStyle(Style.EMPTY.withFont(MyFonts.MONTSERRAT).withColor(COLOR_YELLOW));
-
-            int absorptionTextPositionX = SCREEN_OFFSET_X
-                    + (BAR_WIDTH - healthTextWidth) / 2
-                    + BAR_VERTICAL_OFFSET
-                    + healthTextWidth
-                    + ABSORPTION_TEXT_SPACING;
-            int textCenterY = SCREEN_OFFSET_Y + (BAR_HEIGHT - client.textRenderer.fontHeight) / 2;
-
-            drawContext.drawText(
-                    client.textRenderer,
-                    formattedAbsorptionText,
-                    absorptionTextPositionX,
-                    textCenterY,
-                    COLOR_WHITE,
-                    false
-            );
-        }
     }
 
     // ========================================
@@ -541,6 +519,7 @@ public class HudRendererHelper {
                 foodText,
                 SCREEN_OFFSET_X + BAR_VERTICAL_OFFSET,
                 foodBarPositionY,
+                COLOR_WHITE,
                 false
         );
 
@@ -567,6 +546,7 @@ public class HudRendererHelper {
             String textContent,
             int barPositionX,
             int barPositionY,
+            int color,
             boolean withShadow
     ) {
         Text formattedText = Text.literal(textContent).setStyle(Style.EMPTY.withFont(MyFonts.MONTSERRAT));
@@ -580,7 +560,7 @@ public class HudRendererHelper {
                 formattedText,
                 centeredTextX,
                 centeredTextY,
-                COLOR_WHITE,
+                color,
                 withShadow
         );
     }

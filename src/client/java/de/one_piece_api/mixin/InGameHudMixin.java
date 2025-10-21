@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -93,10 +92,38 @@ public class InGameHudMixin {
         HudRendererHelper.renderFood(context, player, top, right);
         ci.cancel();
     }
+    @Shadow
+    @Final
+    private static Identifier ARMOR_HALF_TEXTURE, ARMOR_FULL_TEXTURE, ARMOR_EMPTY_TEXTURE;
 
-    @ModifyVariable(method = "renderArmor", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private static int lowerArmorBar(int i) {
-        return i + 10; // Increase to lower the bar more
+    @Inject(
+            method = "renderArmor",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private static void lowerArmorBar(DrawContext context, PlayerEntity player, int i, int j, int k, int x, CallbackInfo ci) {
+        int l = player.getArmor();
+        if (l <= 0) {
+            ci.cancel();
+            return;
+        }
+        i = context.getScaledWindowHeight() - 39;
+        j = 0;
+        k = 0;
+        RenderSystem.enableBlend();
+        for (int n = 0; n < 10; ++n) {
+            int o = x + n * 8;
+            if (n * 2 + 1 < l) {
+                context.drawGuiTexture(ARMOR_FULL_TEXTURE, o, i, 9, 9);
+            }
+            if (n * 2 + 1 == l) {
+                context.drawGuiTexture(ARMOR_HALF_TEXTURE, o, i, 9, 9);
+            }
+            if (n * 2 + 1 <= l) continue;
+            context.drawGuiTexture(ARMOR_EMPTY_TEXTURE, o, i, 9, 9);
+        }
+        RenderSystem.disableBlend();
+        ci.cancel();
     }
 
     @Inject(method = "renderStatusBars", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", ordinal = 2), cancellable = true)

@@ -52,9 +52,6 @@ public abstract class GenericTabbedScreen extends Screen {
     /** Horizontal spacing between tabs in pixels */
     private static final int TAB_MARGIN = 20;
 
-    /** Height of tab buttons in pixels */
-    private static final int TAB_HEIGHT_GETTER = getTabHeight();
-
     /** Text color for the selected tab (white) */
     private static final int COLOR_SELECTED = 0xFFFFFFFF;
 

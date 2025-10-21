@@ -92,24 +92,10 @@ public class MyCodecs {
 
 
 
-    public static final PacketCodec<PacketByteBuf, ClassConfig> CLASS_CONFIG = PacketCodec.tuple(
-                TextCodecs.PACKET_CODEC,
-                ClassConfig::name,
-                TextCodecs.PACKET_CODEC,
-                ClassConfig::description,
-                Identifier.PACKET_CODEC,
-                ClassConfig::backTexture,
-                Identifier.PACKET_CODEC,
-                ClassConfig::nameTexture,
-                (a, b,  d, e) -> new ClassConfig(Text.of(a), Text.of(b), null, d, e)
-        );
 
 
-    public static final PacketCodec<PacketByteBuf, Map<Identifier, ClassConfig>> CLASS_CONFIG_MAP = PacketCodecs.map(
-            HashMap::new,
-            Identifier.PACKET_CODEC,
-            CLASS_CONFIG
-    );
+
+
 
 
 

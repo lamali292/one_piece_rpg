@@ -1,24 +1,24 @@
-package de.one_piece_api.screen.widget;
+package de.one_piece_api.screen.widget.main.skill_tree;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.one_piece_api.OnePieceRPG;
+import de.one_piece_api.config.ClassConfig;
+import de.one_piece_api.mixin_interface.ISkillTypeProvider;
+import de.one_piece_api.mixin_interface.SkillType;
 import de.one_piece_api.screen.OnePieceScreen;
-import de.one_piece_api.mixin_interface.IHidden;
 import de.one_piece_api.mixin_interface.StyledConnection;
 import de.one_piece_api.registry.ClientStyleRegistry;
 import de.one_piece_api.init.MyFonts;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.texture.Scaling;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 import net.puffish.skillsmod.api.Skill;
 import net.puffish.skillsmod.client.config.ClientCategoryConfig;
 import net.puffish.skillsmod.client.config.ClientFrameConfig;
@@ -30,45 +30,40 @@ import net.puffish.skillsmod.client.data.ClientCategoryData;
 import net.puffish.skillsmod.client.rendering.ConnectionBatchedRenderer;
 import net.puffish.skillsmod.client.rendering.ItemBatchedRenderer;
 import net.puffish.skillsmod.client.rendering.TextureBatchedRenderer;
-import net.puffish.skillsmod.util.Bounds2i;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Widget for rendering and interacting with the skill tree viewport.
+ * Pure view component for rendering the skill tree.
  * <p>
- * This widget provides a zoomable and pannable view of the skill tree, with
- * interactive skills that can be hovered and clicked. It handles coordinate
- * transformations, viewport clipping, and all skill tree rendering logic.
+ * This widget is a stateless renderer that displays the skill tree based on
+ * provided data and viewport state. It does not manage state internally,
+ * instead firing events for user interactions.
  *
- * <h2>Features:</h2>
+ * <h2>Design Philosophy:</h2>
  * <ul>
- *     <li>Pan and zoom with smooth scrolling</li>
- *     <li>Viewport clipping for efficient rendering</li>
- *     <li>Mouse-to-world coordinate transformation</li>
- *     <li>Skill hover detection with tooltips</li>
- *     <li>Connection rendering between skills</li>
- *     <li>State-based skill coloring (locked, available, unlocked, etc.)</li>
- *     <li>Support for hidden skills (IHidden interface)</li>
- *     <li>Styled connections with custom colors</li>
+ *     <li><b>Stateless</b> - All state passed in via method parameters</li>
+ *     <li><b>Event-driven</b> - Reports user interactions via callbacks</li>
+ *     <li><b>Render-only</b> - Does not modify data or manage viewport state</li>
+ *     <li><b>Coordinate transformation</b> - Converts between spaces using ViewportState</li>
  * </ul>
  *
- * <h2>Coordinate Systems:</h2>
+ * <h2>Event Callbacks:</h2>
  * <ul>
- *     <li>Screen space - Raw mouse coordinates</li>
- *     <li>Viewport space - Relative to viewport origin</li>
- *     <li>World space - Transformed coordinates within the skill tree</li>
+ *     <li>{@link #setOnSkillHover} - Fired when hovering over a skill</li>
+ *     <li>{@link #setOnNoSkillHover} - Fired when not hovering any skill</li>
  * </ul>
  *
  * @see Drawable
- * @see Element
+ * @see ViewportState
  * @see ClientCategoryData
  */
-public class SkillTreeViewportWidget implements Drawable, Element {
+public class SkillTreeViewportWidget {
 
     // ==================== Constants ====================
 
@@ -78,19 +73,13 @@ public class SkillTreeViewportWidget implements Drawable, Element {
     /** Color for locked and excluded skills (dark gray) */
     private static final Vector4fc COLOR_GRAY = new Vector4f(0.25f, 0.25f, 0.25f, 1f);
 
-    /** Extra padding added to content bounds in pixels */
-    private static final int CONTENT_GROW = 32;
-
-    /** Multiplier for scroll wheel sensitivity */
-    private static final double SCROLL_SENSITIVITY = 0.25;
-
     // ==================== Fields ====================
 
-    /** X-coordinate of the viewport's left edge */
-    private final int viewportX;
+    /** X-coordinate of the viewport's left edge in screen space */
+    private final int screenX;
 
-    /** Y-coordinate of the viewport's top edge */
-    private final int viewportY;
+    /** Y-coordinate of the viewport's top edge in screen space */
+    private final int screenY;
 
     /** Width of the viewport in pixels */
     private final int viewportWidth;
@@ -101,56 +90,36 @@ public class SkillTreeViewportWidget implements Drawable, Element {
     /** Minecraft client instance for rendering */
     private final MinecraftClient client;
 
-    /** Current category data containing skills and state */
-    private ClientCategoryData categoryData;
-
-    /** Bounds of the skill tree content in world space */
-    private Bounds2i bounds = Bounds2i.zero();
-
-    /** Minimum allowed zoom scale */
-    private float minScale = 1f;
-
-    /** Maximum allowed zoom scale */
-    private float maxScale = 2f;
-
     /** Callback invoked when a skill is hovered */
     private Consumer<SkillHoverInfo> onSkillHover;
 
     /** Callback invoked when no skill is hovered */
     private Runnable onNoSkillHover;
 
+    // Hover throttling
+    private String lastHoveredSkillId = null;
+    private long lastHoverUpdateTime = 0;
+    private static final long HOVER_UPDATE_INTERVAL_MS = 50;
+
     // ==================== Constructor ====================
 
     /**
      * Creates a new skill tree viewport widget.
      *
-     * @param x the x-coordinate of the viewport's left edge
-     * @param y the y-coordinate of the viewport's top edge
+     * @param x the x-coordinate of the viewport's left edge in screen space
+     * @param y the y-coordinate of the viewport's top edge in screen space
      * @param width the width of the viewport in pixels
      * @param height the height of the viewport in pixels
      */
     public SkillTreeViewportWidget(int x, int y, int width, int height) {
-        this.viewportX = x;
-        this.viewportY = y;
+        this.screenX = x;
+        this.screenY = y;
         this.viewportWidth = width;
         this.viewportHeight = height;
         this.client = MinecraftClient.getInstance();
     }
 
-    // ==================== Configuration ====================
-
-    /**
-     * Sets the category data to display in the viewport.
-     * <p>
-     * Recalculates bounds and zoom limits based on the new category's
-     * skill layout.
-     *
-     * @param categoryData the category data, or {@code null} to clear
-     */
-    public void setCategoryData(ClientCategoryData categoryData) {
-        this.categoryData = categoryData;
-        calculateBounds();
-    }
+    // ==================== Event Handlers ====================
 
     /**
      * Sets the callback for skill hover events.
@@ -173,119 +142,38 @@ public class SkillTreeViewportWidget implements Drawable, Element {
         this.onNoSkillHover = handler;
     }
 
-    // ==================== Bounds Calculation ====================
-
-    /**
-     * Calculates the bounds and zoom constraints for the skill tree.
-     * <p>
-     * Determines the world-space bounds of all skills, adds padding,
-     * and calculates minimum/maximum zoom levels based on viewport size.
-     */
-    private void calculateBounds() {
-        if (categoryData == null) {
-            this.bounds = Bounds2i.zero();
-            return;
-        }
-
-        this.bounds = categoryData.getConfig().getBounds();
-        this.bounds.grow(CONTENT_GROW);
-
-        int halfContentWidth = MathHelper.ceilDiv(this.bounds.height() * viewportWidth, viewportHeight * 2);
-        int halfContentHeight = MathHelper.ceilDiv(this.bounds.width() * viewportHeight, viewportWidth * 2);
-
-        this.bounds.extend(new Vector2i(-halfContentWidth, -halfContentHeight));
-        this.bounds.extend(new Vector2i(halfContentWidth, halfContentHeight));
-
-        this.minScale = Math.max(
-                (float) viewportWidth / this.bounds.width(),
-                (float) viewportHeight / this.bounds.height()
-        ) * 0.75F;
-        this.maxScale = 2f;
-
-        applyViewChanges(
-                categoryData.getX(),
-                categoryData.getY(),
-                categoryData.getScale()
-        );
-    }
-
-    /**
-     * Applies and clamps view changes for pan and zoom operations.
-     * <p>
-     * Ensures the viewport stays within valid bounds and zoom levels.
-     * Allows some dragging beyond viewport edges for better UX.
-     *
-     * @param x the new x-offset
-     * @param y the new y-offset
-     * @param scale the new zoom scale
-     */
-    private void applyViewChanges(int x, int y, float scale) {
-        if (this.bounds.width() <= 0 || this.bounds.height() <= 0 || categoryData == null) {
-            return;
-        }
-
-        int halfWidth = viewportWidth / 2;
-        int halfHeight = viewportHeight / 2;
-
-        // Calculate the actual content size at this scale
-        int scaledWidth = (int) (bounds.width() * scale);
-        int scaledHeight = (int) (bounds.height() * scale);
-
-        // Add padding to allow dragging beyond viewport edges
-        int dragPadding = 40;
-
-        int minX, maxX, minY, maxY;
-
-        if (scaledWidth < viewportWidth) {
-            // Allow dragging with padding even when smaller than viewport
-            int centerOffset = (viewportWidth - scaledWidth) / 2;
-            minX = -centerOffset - dragPadding;
-            maxX = centerOffset + dragPadding;
-        } else {
-            minX = (int) Math.ceil(halfWidth - bounds.max().x() * scale);
-            maxX = (int) Math.floor(-halfWidth - bounds.min().x() * scale);
-        }
-
-        if (scaledHeight < viewportHeight) {
-            // Allow dragging with padding even when smaller than viewport
-            int centerOffset = (viewportHeight - scaledHeight) / 2;
-            minY = -centerOffset - dragPadding;
-            maxY = centerOffset + dragPadding;
-        } else {
-            minY = (int) Math.ceil(halfHeight - bounds.max().y() * scale);
-            maxY = (int) Math.floor(-halfHeight - bounds.min().y() * scale);
-        }
-
-        categoryData.setX(MathHelper.clamp(x, minX, maxX));
-        categoryData.setY(MathHelper.clamp(y, minY, maxY));
-        categoryData.setScale(MathHelper.clamp(scale, minScale, maxScale));
-    }
-
     // ==================== Rendering ====================
 
     /**
      * Renders the skill tree viewport.
      * <p>
-     * Sets up scissor testing for clipping, renders the skill tree with
-     * all skills and connections, and handles hover detection.
+     * This is the main entry point for rendering. All required state must be
+     * passed as parameters.
      *
      * @param context the drawing context
      * @param mouseX the mouse x-coordinate in screen space
      * @param mouseY the mouse y-coordinate in screen space
      * @param delta the frame delta time (unused)
+     * @param viewportState the current viewport transformation state
+     * @param categoryData the category data containing skills and state
+     * @param classConfig the class configuration for filtering visible skills
      */
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (categoryData == null) return;
+    public void render(DrawContext context, int mouseX, int mouseY, float delta,
+                       ViewportState viewportState, ClientCategoryData categoryData,
+                       ClassConfig classConfig) {
+        if (categoryData == null || viewportState == null) {
+            return;
+        }
 
         setupRenderState();
-        context.enableScissor(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight);
+        context.enableScissor(screenX, screenY, screenX + viewportWidth, screenY + viewportHeight);
 
-        double relativeMouseX = mouseX - viewportX;
-        double relativeMouseY = mouseY - viewportY;
+        double relativeMouseX = mouseX - screenX;
+        double relativeMouseY = mouseY - screenY;
 
-        renderSkillTree(context, relativeMouseX, relativeMouseY);
+        renderSkillTree(context, relativeMouseX, relativeMouseY, viewportState, categoryData, classConfig);
         renderTitle(context);
+
         context.disableScissor();
     }
 
@@ -300,8 +188,9 @@ public class SkillTreeViewportWidget implements Drawable, Element {
         Text titleText = Text.translatable("gui." + OnePieceRPG.MOD_ID + ".skill.skilltree")
                 .setStyle(Style.EMPTY.withFont(MyFonts.MONTSERRAT).withFormatting(Formatting.UNDERLINE));
         int textWidth = client.textRenderer.getWidth(titleText);
-        int textX = OnePieceScreen.Layout.SKILLTREE_OFFSET_X + (OnePieceScreen.Layout.SKILLTREE_WIDTH - textWidth) / 2 + viewportX;
-        int textY = 4 + viewportY;
+        int textX = OnePieceScreen.Layout.SKILLTREE_OFFSET_X +
+                (OnePieceScreen.Layout.SKILLTREE_WIDTH - textWidth) / 2 + screenX;
+        int textY = 4 + screenY;
 
         context.drawText(client.textRenderer, titleText, textX, textY, 0xffffffff, false);
     }
@@ -327,27 +216,39 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      * @param context the drawing context
      * @param mouseX the mouse x-coordinate in viewport space
      * @param mouseY the mouse y-coordinate in viewport space
+     * @param viewportState the viewport transformation state
+     * @param categoryData the category data
+     * @param classConfig the class configuration
      */
-    private void renderSkillTree(DrawContext context, double mouseX, double mouseY) {
+    private void renderSkillTree(DrawContext context, double mouseX, double mouseY,
+                                 ViewportState viewportState, ClientCategoryData categoryData,
+                                 ClassConfig classConfig) {
         var activeCategory = categoryData.getConfig();
         Vector2i mouse = new Vector2i((int) mouseX, (int) mouseY);
-        Vector2i transformedMouse = getTransformedMousePos(mouseX, mouseY);
+        Vector2i transformedMouse = viewportState.viewportToWorld(mouseX, mouseY);
 
         context.getMatrices().push();
         context.getMatrices().translate(
-                categoryData.getX() + viewportWidth / 2F + viewportX,
-                categoryData.getY() + viewportHeight / 2f + viewportY,
+                viewportState.getX() + viewportWidth / 2f + screenX,
+                viewportState.getY() + viewportHeight / 2f + screenY,
                 0f
         );
-        context.getMatrices().scale(categoryData.getScale(), categoryData.getScale(), 1f);
+        context.getMatrices().scale(
+                viewportState.getScale(),
+                viewportState.getScale(),
+                1f
+        );
 
-        ConnectionBatchedRenderer connectionRenderer = renderConnections(context, activeCategory);
+        ConnectionBatchedRenderer connectionRenderer = renderConnections(
+                context, activeCategory, categoryData
+        );
 
-        Optional<ClientSkillConfig> hoveredSkill = findHoveredSkill(mouse, transformedMouse, activeCategory);
-        if (hoveredSkill.isPresent()) {
-            handleSkillHover(hoveredSkill.get(), activeCategory, connectionRenderer, context);
-        } else if (onNoSkillHover != null) {
-            onNoSkillHover.run();
+        // Throttled hover updates
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastHoverUpdateTime > HOVER_UPDATE_INTERVAL_MS) {
+            updateHoverState(mouse, transformedMouse, activeCategory, categoryData,
+                    classConfig, connectionRenderer, context);
+            lastHoverUpdateTime = currentTime;
         }
 
         context.draw();
@@ -356,9 +257,44 @@ public class SkillTreeViewportWidget implements Drawable, Element {
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         connectionRenderer.draw();
 
-        renderSkills(context, activeCategory);
+        renderSkills(context, activeCategory, categoryData, classConfig);
 
         context.getMatrices().pop();
+    }
+
+    /**
+     * Updates hover state and fires appropriate callbacks.
+     *
+     * @param mouse mouse position in viewport space
+     * @param transformedMouse mouse position in world space
+     * @param activeCategory the category configuration
+     * @param categoryData the category data
+     * @param classConfig the class configuration
+     * @param connectionRenderer the connection renderer
+     * @param context the drawing context
+     */
+    private void updateHoverState(Vector2i mouse, Vector2i transformedMouse,
+                                  ClientCategoryConfig activeCategory,
+                                  ClientCategoryData categoryData,
+                                  ClassConfig classConfig,
+                                  ConnectionBatchedRenderer connectionRenderer,
+                                  DrawContext context) {
+        Optional<ClientSkillConfig> hoveredSkill = findHoveredSkill(
+                mouse, transformedMouse, activeCategory, classConfig
+        );
+
+        String currentHoveredId = hoveredSkill.map(ClientSkillConfig::id).orElse(null);
+
+        // Only trigger callbacks if hover actually changed
+        if (!Objects.equals(currentHoveredId, lastHoveredSkillId)) {
+            if (hoveredSkill.isPresent()) {
+                handleSkillHover(hoveredSkill.get(), activeCategory, categoryData,
+                        connectionRenderer, context);
+            } else if (onNoSkillHover != null) {
+                onNoSkillHover.run();
+            }
+            lastHoveredSkillId = currentHoveredId;
+        }
     }
 
     /**
@@ -368,18 +304,24 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      *
      * @param context the drawing context
      * @param activeCategory the category configuration
+     * @param categoryData the category data
      * @return the connection renderer for additional rendering
      */
-    private ConnectionBatchedRenderer renderConnections(DrawContext context, ClientCategoryConfig activeCategory) {
+    private ConnectionBatchedRenderer renderConnections(DrawContext context,
+                                                        ClientCategoryConfig activeCategory,
+                                                        ClientCategoryData categoryData) {
         ConnectionBatchedRenderer renderer = new ConnectionBatchedRenderer();
 
         for (ClientSkillConnectionConfig connection : activeCategory.normalConnections()) {
             StyledConnection styled = (StyledConnection) (Object) connection;
             if (styled == null) continue;
+
             categoryData.getConnection(connection).ifPresent(relation -> {
-                int color = styled.onepiece$getStyle().flatMap(ClientStyleRegistry::getStyle).map(style ->
-                        style.color().argb()
-                ).orElse(relation.getColor().fill().argb());
+                int color = styled.onepiece$getStyle()
+                        .flatMap(ClientStyleRegistry::getStyle)
+                        .map(style -> style.color().argb())
+                        .orElse(relation.getColor().fill().argb());
+
                 renderer.emitConnection(
                         context,
                         relation.getSkillA().x(), relation.getSkillA().y(),
@@ -388,7 +330,6 @@ public class SkillTreeViewportWidget implements Drawable, Element {
                         color,
                         relation.getColor().stroke().argb()
                 );
-
             });
         }
         return renderer;
@@ -400,20 +341,42 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      * @param mouse mouse position in viewport space
      * @param transformedMouse mouse position in world space
      * @param activeCategory the category configuration
+     * @param classConfig the class configuration
      * @return an {@link Optional} containing the hovered skill, or empty if none
      */
     private Optional<ClientSkillConfig> findHoveredSkill(Vector2i mouse, Vector2i transformedMouse,
-                                                         ClientCategoryConfig activeCategory) {
+                                                         ClientCategoryConfig activeCategory,
+                                                         ClassConfig classConfig) {
         if (isOutsideViewport(mouse)) {
             return Optional.empty();
         }
 
+        List<String> rewardIDs = getRewardIDs(classConfig);
+
         return activeCategory.skills().values().stream()
-                .filter(skill -> !shouldIgnoreSkill(skill))
+                .filter(skill -> isVisible(skill, rewardIDs))
                 .filter(skill -> activeCategory.getDefinitionById(skill.definitionId())
                         .map(definition -> isInsideSkill(transformedMouse, skill, definition))
                         .orElse(false))
                 .findFirst();
+    }
+
+    /**
+     * Checks if a skill is visible based on its type and configuration.
+     *
+     * @param skill the skill to check
+     * @param rewardIDs list of reward IDs from class config
+     * @return {@code true} if visible, {@code false} otherwise
+     */
+    private boolean isVisible(ClientSkillConfig skill, List<String> rewardIDs) {
+        SkillType skillType = getSkillType(skill);
+
+        return switch (skillType) {
+            case SKILL_TREE -> true;
+            case CLASS -> rewardIDs != null && !rewardIDs.isEmpty() &&
+                    rewardIDs.contains(skill.definitionId());
+            default -> false;
+        };
     }
 
     /**
@@ -424,11 +387,14 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      *
      * @param skill the hovered skill
      * @param activeCategory the category configuration
+     * @param categoryData the category data
      * @param connectionRenderer the connection renderer
      * @param context the drawing context
      */
     private void handleSkillHover(ClientSkillConfig skill, ClientCategoryConfig activeCategory,
-                                  ConnectionBatchedRenderer connectionRenderer, DrawContext context) {
+                                  ClientCategoryData categoryData,
+                                  ConnectionBatchedRenderer connectionRenderer,
+                                  DrawContext context) {
         var definition = activeCategory.definitions().get(skill.definitionId());
         if (definition == null) return;
 
@@ -462,30 +428,92 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      * Renders all visible skills.
      * <p>
      * Skills are rendered with frames and icons based on their state
-     * and configuration. Hidden skills are skipped.
+     * and configuration.
      *
      * @param context the drawing context
      * @param activeCategory the category configuration
+     * @param categoryData the category data
+     * @param classConfig the class configuration
      */
-    private void renderSkills(DrawContext context, ClientCategoryConfig activeCategory) {
+    private void renderSkills(DrawContext context, ClientCategoryConfig activeCategory,
+                              ClientCategoryData categoryData, ClassConfig classConfig) {
         TextureBatchedRenderer textureRenderer = new TextureBatchedRenderer();
         ItemBatchedRenderer itemRenderer = new ItemBatchedRenderer();
 
-        for (var skill : activeCategory.skills().values()) {
-            if (shouldIgnoreSkill(skill)) continue;
+        List<String> rewardIDs = getRewardIDs(classConfig);
+        Map<String, Integer> rewardLevels = getRewardLevels(classConfig);
+        activeCategory.skills().values().stream()
+                .filter(skill -> isVisible(skill, rewardIDs))
+                .forEach(skill -> {
+                    activeCategory.getDefinitionById(skill.definitionId()).ifPresent(definition -> {
+                        Skill.State skillState = categoryData.getSkillState(skill);
 
-            activeCategory.getDefinitionById(skill.definitionId()).ifPresent(definition -> {
-                Skill.State skillState = categoryData.getSkillState(skill);
+                        drawFrame(context, textureRenderer, definition.frame(),
+                                definition.size(), skill.x(), skill.y(), skillState);
+                        drawIcon(context, textureRenderer, itemRenderer, definition.icon(),
+                                definition.size(), skill.x(), skill.y());
+                    });
+                });
 
-                drawFrame(context, textureRenderer, definition.frame(),
-                        definition.size(), skill.x(), skill.y(), skillState);
-                drawIcon(context, textureRenderer, itemRenderer, definition.icon(),
-                        definition.size(), skill.x(), skill.y());
-            });
-        }
 
         textureRenderer.draw();
         itemRenderer.draw();
+        activeCategory.skills().values().stream()
+                .filter(skill -> isVisible(skill, rewardIDs))
+                .forEach(skill -> {
+                    Integer level = rewardLevels.get(skill.definitionId());
+                    if (level != null) {
+                        drawLevelText(context, skill.x(), skill.y(), level);
+                    }
+                });
+    }
+
+
+    /**
+     * Draws the level requirement text for a class reward skill.
+     * <p>
+     * Renders the level number below the skill icon with a shadow for visibility.
+     *
+     * @param context the drawing context
+     * @param x the skill x-coordinate in world space
+     * @param y the skill y-coordinate in world space
+     * @param level the level requirement
+     */
+    private void drawLevelText(DrawContext context, int x, int y, int level) {
+        String levelText = "lvl "+ level;
+        var text = Text.literal(levelText).setStyle(Style.EMPTY.withFont(MyFonts.PRESS_START));
+        int textWidth = client.textRenderer.getWidth(text);
+        // Position text below the skill frame
+        int textX = x - textWidth / 2;
+        int textY = y + 15; // Below the 13px half-size frame + 2px spacing
+
+        // Draw with shadow for visibility against any background
+        context.drawText(
+                client.textRenderer,
+                text,
+                textX,
+                textY,
+                0xFFFFFFFF, // White text
+                true      // With shadow
+        );
+    }
+
+    /**
+     * Creates a map of skill definition IDs to their level requirements.
+     *
+     * @param classConfig the class configuration
+     * @return map of definition ID to level, or empty map if config is null
+     */
+    private Map<String, Integer> getRewardLevels(ClassConfig classConfig) {
+        if (classConfig == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Integer> levels = new HashMap<>();
+        for (ClassConfig.LevelReward reward : classConfig.rewards()) {
+            levels.put(reward.reward().toString(), reward.level());
+        }
+        return levels;
     }
 
     /**
@@ -503,7 +531,8 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      * @param state the skill state
      */
     private void drawFrame(DrawContext context, TextureBatchedRenderer textureRenderer,
-                           ClientFrameConfig frame, float sizeScale, int x, int y, Skill.State state) {
+                           ClientFrameConfig frame, float sizeScale, int x, int y,
+                           Skill.State state) {
         int halfSize = Math.round(13f * sizeScale);
         int size = halfSize * 2;
 
@@ -588,7 +617,8 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      * @param texFrame the texture frame configuration
      * @return the texture identifier
      */
-    private Identifier getTextureForState(Skill.State state, ClientFrameConfig.TextureFrameConfig texFrame) {
+    private Identifier getTextureForState(Skill.State state,
+                                          ClientFrameConfig.TextureFrameConfig texFrame) {
         return switch (state) {
             case LOCKED -> texFrame.lockedTexture().orElse(texFrame.availableTexture());
             case AVAILABLE -> texFrame.availableTexture();
@@ -605,7 +635,8 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      * @param texFrame the texture frame configuration
      * @return the color vector
      */
-    private Vector4fc getColorForState(Skill.State state, ClientFrameConfig.TextureFrameConfig texFrame) {
+    private Vector4fc getColorForState(Skill.State state,
+                                       ClientFrameConfig.TextureFrameConfig texFrame) {
         return switch (state) {
             case LOCKED -> texFrame.lockedTexture().isPresent() ? COLOR_WHITE : COLOR_GRAY;
             case EXCLUDED -> texFrame.excludedTexture().isPresent() ? COLOR_WHITE : COLOR_GRAY;
@@ -613,29 +644,35 @@ public class SkillTreeViewportWidget implements Drawable, Element {
         };
     }
 
-    // ==================== Position Queries ====================
+    // ==================== Hit Testing ====================
 
     /**
      * Gets the skill ID at a specific screen position.
      *
      * @param mouseX the mouse x-coordinate in screen space
      * @param mouseY the mouse y-coordinate in screen space
+     * @param viewportState the viewport transformation state
+     * @param activeCategory the category configuration
+     * @param classConfig the class configuration
      * @return an {@link Optional} containing the skill ID, or empty if none
      */
-    public Optional<String> getSkillAtPosition(double mouseX, double mouseY) {
-        if (categoryData == null) return Optional.empty();
-
-        double relativeX = mouseX - viewportX;
-        double relativeY = mouseY - viewportY;
+    public Optional<String> getSkillAtPosition(double mouseX, double mouseY,
+                                               ViewportState viewportState,
+                                               ClientCategoryConfig activeCategory,
+                                               ClassConfig classConfig) {
+        double relativeX = mouseX - screenX;
+        double relativeY = mouseY - screenY;
 
         Vector2i mouse = new Vector2i((int) relativeX, (int) relativeY);
-        if (isOutsideViewport(mouse)) return Optional.empty();
+        if (isOutsideViewport(mouse)) {
+            return Optional.empty();
+        }
 
-        Vector2i transformedMouse = getTransformedMousePos(relativeX, relativeY);
-        var activeCategory = categoryData.getConfig();
+        Vector2i transformedMouse = viewportState.viewportToWorld(relativeX, relativeY);
+        List<String> rewardIDs = getRewardIDs(classConfig);
 
         return activeCategory.skills().values().stream()
-                .filter(skill -> !shouldIgnoreSkill(skill))
+                .filter(skill -> isVisible(skill, rewardIDs))
                 .filter(skill -> activeCategory.getDefinitionById(skill.definitionId())
                         .map(definition -> isInsideSkill(transformedMouse, skill, definition))
                         .orElse(false))
@@ -643,72 +680,47 @@ public class SkillTreeViewportWidget implements Drawable, Element {
                 .map(ClientSkillConfig::id);
     }
 
-    // ==================== View Manipulation ====================
-
     /**
-     * Applies zoom centered on a specific point.
-     * <p>
-     * Zooms while keeping the point under the mouse stationary, creating
-     * an intuitive zoom-to-cursor effect.
+     * Checks if a screen position is outside the viewport bounds.
      *
      * @param mouseX the mouse x-coordinate in screen space
      * @param mouseY the mouse y-coordinate in screen space
-     * @param verticalAmount the scroll amount (positive = zoom in)
+     * @return {@code true} if outside viewport, {@code false} otherwise
      */
-    public void applyZoom(double mouseX, double mouseY, double verticalAmount) {
-        if (categoryData == null) return;
+    public boolean isMouseOutsideViewport(double mouseX, double mouseY) {
+        return mouseX < screenX || mouseY < screenY ||
+                mouseX >= screenX + viewportWidth || mouseY >= screenY + viewportHeight;
+    }
 
-        double relativeX = mouseX - viewportX;
-        double relativeY = mouseY - viewportY;
+    // ==================== Helper Methods ====================
 
-        float factor = (float) Math.pow(2, verticalAmount * SCROLL_SENSITIVITY);
-
-        int x0 = categoryData.getX();
-        int y0 = categoryData.getY();
-        float currentScale = categoryData.getScale();
-        float newScale = MathHelper.clamp(currentScale * factor, minScale, maxScale);
-
-        float actualFactor = newScale / currentScale;
-
-        applyViewChanges(
-                x0 - (int) Math.round((actualFactor - 1f) * (relativeX - x0 - viewportWidth / 2f)),
-                y0 - (int) Math.round((actualFactor - 1f) * (relativeY - y0 - viewportHeight / 2f)),
-                newScale
-        );
+    /**
+     * Gets the skill type for visibility filtering.
+     *
+     * @param skill the skill to check
+     * @return the skill type
+     */
+    private @NotNull SkillType getSkillType(ClientSkillConfig skill) {
+        ISkillTypeProvider iSkillType = (ISkillTypeProvider) (Object) skill;
+        if (iSkillType == null) return SkillType.NONE;
+        return iSkillType.onepiece$getSkillType();
     }
 
     /**
-     * Applies panning based on drag offset.
+     * Checks if the mouse is inside a skill's bounds.
      *
-     * @param adjustedMouseX the current mouse x-coordinate adjusted for drag
-     * @param adjustedMouseY the current mouse y-coordinate adjusted for drag
-     * @param startX the drag start x-coordinate
-     * @param startY the drag start y-coordinate
+     * @param transformedMouse the mouse position in world space
+     * @param skill the skill to check
+     * @param definition the skill definition
+     * @return {@code true} if inside skill bounds, {@code false} otherwise
      */
-    public void applyPan(double adjustedMouseX, double adjustedMouseY, double startX, double startY) {
-        if (categoryData == null) return;
-
-        applyViewChanges(
-                (int) Math.round(adjustedMouseX - startX),
-                (int) Math.round(adjustedMouseY - startY),
-                categoryData.getScale()
-        );
-    }
-
-    // ==================== Coordinate Transformation ====================
-
-    /**
-     * Transforms mouse position from viewport space to world space.
-     *
-     * @param mouseX the mouse x-coordinate in viewport space
-     * @param mouseY the mouse y-coordinate in viewport space
-     * @return the position in world space
-     */
-    private Vector2i getTransformedMousePos(double mouseX, double mouseY) {
-        return new Vector2i(
-                (int) Math.round((mouseX - categoryData.getX() - viewportWidth / 2.0) / categoryData.getScale()),
-                (int) Math.round((mouseY - categoryData.getY() - viewportHeight / 2.0) / categoryData.getScale())
-        );
+    private boolean isInsideSkill(Vector2i transformedMouse, ClientSkillConfig skill,
+                                  ClientSkillDefinitionConfig definition) {
+        int halfSize = Math.round(13f * definition.size());
+        return transformedMouse.x >= skill.x() - halfSize &&
+                transformedMouse.y >= skill.y() - halfSize &&
+                transformedMouse.x < skill.x() + halfSize &&
+                transformedMouse.y < skill.y() + halfSize;
     }
 
     /**
@@ -718,52 +730,40 @@ public class SkillTreeViewportWidget implements Drawable, Element {
      * @return {@code true} if outside viewport, {@code false} otherwise
      */
     private boolean isOutsideViewport(Vector2i mouse) {
-        return mouse.x < 0 || mouse.y < 0 || mouse.x >= viewportWidth || mouse.y >= viewportHeight;
+        return mouse.x < 0 || mouse.y < 0 ||
+                mouse.x >= viewportWidth || mouse.y >= viewportHeight;
     }
 
     /**
-     * Checks if a skill should be ignored (hidden).
+     * Extracts reward IDs from class configuration.
      *
-     * @param skill the skill to check
-     * @return {@code true} if the skill should be ignored, {@code false} otherwise
+     * @param classConfig the class configuration
+     * @return list of reward IDs, or empty list if config is null
      */
-    private boolean shouldIgnoreSkill(ClientSkillConfig skill) {
-        IHidden iHidden = (IHidden) (Object) skill;
-        if (iHidden == null ) return true;
-        return iHidden.onepiece$isHidden();
+    private List<String> getRewardIDs(ClassConfig classConfig) {
+        if (classConfig == null) {
+            return Collections.emptyList();
+        }
+        return classConfig.rewards().stream()
+                .map(ClassConfig.LevelReward::reward)
+                .map(Identifier::toString)
+                .toList();
     }
 
-    private boolean isInsideSkill(Vector2i transformedMouse, ClientSkillConfig skill,
-                                  ClientSkillDefinitionConfig definition) {
-        if (shouldIgnoreSkill(skill)) return false;
+    // ==================== Inner Classes ====================
 
-        int halfSize = Math.round(13f * definition.size());
-        return transformedMouse.x >= skill.x() - halfSize &&
-                transformedMouse.y >= skill.y() - halfSize &&
-                transformedMouse.x < skill.x() + halfSize &&
-                transformedMouse.y < skill.y() + halfSize;
-    }
-
-    public boolean isMouseNotInViewport(double mouseX, double mouseY) {
-        return !(mouseX >= viewportX) || !(mouseY >= viewportY) ||
-                !(mouseX < viewportX + viewportWidth) || !(mouseY < viewportY + viewportHeight);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return false; // Handled by parent
-    }
-
-    @Override
-    public void setFocused(boolean focused) {
-    }
-
-    @Override
-    public boolean isFocused() {
-        return false;
-    }
-
-    public record SkillHoverInfo(net.minecraft.text.Text title, net.minecraft.text.Text description,
-                                 net.minecraft.text.Text extraDescription, String skillId) {
-    }
+    /**
+     * Record containing hover information for skill tooltips.
+     *
+     * @param title the skill title
+     * @param description the skill description
+     * @param extraDescription additional description text
+     * @param skillId the skill identifier
+     */
+    public record SkillHoverInfo(
+            Text title,
+            Text description,
+            Text extraDescription,
+            String skillId
+    ) {}
 }

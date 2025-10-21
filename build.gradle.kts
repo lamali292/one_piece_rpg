@@ -137,7 +137,8 @@ dependencies {
 
     // Common mods
     // Pufferfish's Skills
-    modApi("curse.maven:puffish-skills-835091:6999511")
+    //modApi("curse.maven:puffish-skills-835091:6999511")
+    modApi("maven.modrinth:skills:lDeAWUPz")
 
     // Spell Engine and transitive dependencies that don't get handled somehow
     modApi("maven.modrinth:spell-engine:1.7.3+1.21.1")

@@ -6,14 +6,7 @@
   "rewards": [
     {
       "level": 1,
-      "reward": {
-        "type": "one_piece_api:passive_ability",
-        "data": {
-          "abilities": [
-            "one_piece_content:master_of_the_seas"
-          ]
-        }
-      }
+      "reward": "one_piece_content:master_of_the_seas"
     }
   ]
 }

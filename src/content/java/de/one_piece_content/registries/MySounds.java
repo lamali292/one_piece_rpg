@@ -1,8 +1,6 @@
 package de.one_piece_content.registries;
 
 import de.one_piece_content.ExampleMod;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;

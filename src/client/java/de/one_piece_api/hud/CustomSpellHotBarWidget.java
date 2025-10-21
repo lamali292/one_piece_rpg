@@ -264,6 +264,7 @@ public class CustomSpellHotBarWidget {
         double playerStamina = iStaminaPlayer.onepiece$getStamina();
         double staminaRatio = Math.min(1.0, playerStamina / requiredStamina);
 
+        if (staminaRatio == 1.0) return;
         int iconSize = 17;
         int barWidth = 1;
         int barHeight = 16;
@@ -280,11 +281,11 @@ public class CustomSpellHotBarWidget {
 
         // Color: Green -> Yellow -> Red based on stamina ratio
         int color;
-        if (staminaRatio >= 1.0) {
+        if (staminaRatio >= 0.75) {
             color = 0xFF00FF00; // Bright green - enough stamina
         } else if (staminaRatio >= 0.5) {
             color = 0xFFFFFF00; // Yellow - medium stamina
-        } else if (staminaRatio > 0) {
+        } else if (staminaRatio > 0.25) {
             color = 0xFFFF8800; // Orange - low stamina
         } else {
             color = 0xFFFF0000; // Red - no stamina

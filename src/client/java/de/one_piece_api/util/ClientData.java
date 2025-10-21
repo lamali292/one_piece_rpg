@@ -8,41 +8,41 @@ import net.minecraft.util.Identifier;
 import java.util.Map;
 
 /**
- * Client-side data storage for synchronized game configurations.
- * <p>
- * This class provides observable containers for configuration data that is
- * synchronized from the server to the client. UI components and game logic
- * can subscribe to these observables to react to configuration updates.
- *
- * @see Observable
- * @see ClassConfig
- * @see DevilFruitConfig
+ * Centralized client-side data storage with change notifications.
+ * All UI components should listen to these observables for updates.
  */
 public class ClientData {
-
-    /**
-     * Observable container for devil fruit configuration data.
-     * <p>
-     * This configuration is synchronized from the server and contains information
-     * about devil fruit abilities, effects, and properties. Listeners can be
-     * attached to react to configuration updates.
-     */
     public static final Observable<DevilFruitConfig> DEVIL_FRUIT_CONFIG = new Observable<>();
-
-    /**
-     * Observable container for class configuration data mapped by identifier.
-     * <p>
-     * This configuration is synchronized from the server and contains all available
-     * class definitions mapped by their identifiers. Listeners can be attached to
-     * react to configuration updates or additions.
-     */
     public static final Observable<Map<Identifier, ClassConfig>> CLASS_CONFIG = new Observable<>();
 
-    /**
-     * Initializes client data storage.
-     * <p>
-     * This method should be called during client initialization.
-     */
+    // NEW: Observable for data invalidation events
+    public static final Observable<DataInvalidationEvent> DATA_INVALIDATION = new Observable<>();
+
     public static void init() {
+        // Set up cascading invalidation when configs change
+        DEVIL_FRUIT_CONFIG.addListener(config -> invalidate(DataInvalidationType.DEVIL_FRUIT_CONFIG));
+        CLASS_CONFIG.addListener(configs -> invalidate(DataInvalidationType.CLASS_CONFIG));
     }
+
+    /**
+     * Notifies all listeners that data has been invalidated and needs refresh
+     */
+    public static void invalidate(DataInvalidationType type) {
+        DATA_INVALIDATION.set(new DataInvalidationEvent(type, System.currentTimeMillis()));
+    }
+
+    /**
+     * Types of data that can be invalidated
+     */
+    public enum DataInvalidationType {
+        DEVIL_FRUIT_CONFIG,
+        CLASS_CONFIG,
+        CATEGORY_DATA,
+        ALL
+    }
+
+    /**
+     * Event fired when data is invalidated
+     */
+    public record DataInvalidationEvent(DataInvalidationType type, long timestamp) {}
 }

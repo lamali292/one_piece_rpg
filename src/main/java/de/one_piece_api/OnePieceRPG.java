@@ -15,8 +15,11 @@ public class OnePieceRPG {
     public static final Marker CLIENT_PAYLOAD_MARKER = MarkerFactory.getMarker("CLIENT PAYLOAD");
     public static final Marker SERVER_PAYLOAD_MARKER = MarkerFactory.getMarker("SERVER PAYLOAD");
     public static final Marker CLASS_REWARD_HANDLER = MarkerFactory.getMarker("ClassRewardHandler");
+    public static final Marker UI_UPDATE = MarkerFactory.getMarker("UIUpdate");
+    public static final Marker LOADING_DATA = MarkerFactory.getMarker("Dataloading");;
 
     public static final boolean DEBUG = true;
+
 
     public static Identifier id(String name) {
         return Identifier.of(MOD_ID, name);

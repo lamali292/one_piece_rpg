@@ -5,8 +5,9 @@ import de.one_piece_api.config.DevilFruitConfig;
 import de.one_piece_api.config.DevilFruitPathConfig;
 import de.one_piece_api.data.experience.ItemExperienceSource;
 import de.one_piece_api.data.experience.TimeExperienceSource;
+import de.one_piece_api.mixin_interface.SkillType;
 import de.one_piece_api.util.interfaces.ICategoryAccessor;
-import de.one_piece_api.mixin_interface.IHidden;
+import de.one_piece_api.mixin_interface.ISkillTypeProvider;
 import de.one_piece_api.init.MyDataComponentTypes;
 import de.one_piece_api.util.DataGenUtil;
 import de.one_piece_api.util.OnePieceCategory;
@@ -222,7 +223,7 @@ public class CategoryLoader {
             Map<String, SkillConfig> skillConfigs = fruitConfig.paths().stream()
                     .map(DevilFruitPathConfig::skills)
                     .flatMap(skillIds -> collectSkillsFromFruit(skillIds).stream())
-                    .peek(CategoryLoader::markSkillAsHidden)
+                    .peek(CategoryLoader::markSkillAsDevilFruit)
                     .collect(Collectors.toMap(
                             SkillConfig::id,
                             skill -> skill,
@@ -269,11 +270,11 @@ public class CategoryLoader {
         return connections;
     }
 
-    private static void markSkillAsHidden(SkillConfig skillConfig) {
-        IHidden hidden = (IHidden) (Object) skillConfig;
+    private static void markSkillAsDevilFruit(SkillConfig skillConfig) {
+        ISkillTypeProvider hidden = (ISkillTypeProvider) (Object) skillConfig;
 
         if (hidden != null) {
-            hidden.onepiece$setHidden(true);
+            hidden.onepiece$setSkillType(SkillType.DEVIL_FRUIT);
         }
     }
 

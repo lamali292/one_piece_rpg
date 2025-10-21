@@ -1,4 +1,4 @@
-package de.one_piece_api.screen.widget;
+package de.one_piece_api.screen.widget.main;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.one_piece_api.OnePieceRPG;

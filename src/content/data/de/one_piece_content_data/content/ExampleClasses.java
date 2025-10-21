@@ -1,12 +1,18 @@
 package de.one_piece_content_data.content;
 
 import de.one_piece_api.config.ClassConfig;
+import de.one_piece_api.config.skill.SkillDefinitionConfig;
+import de.one_piece_api.mixin_interface.SkillType;
 import de.one_piece_api.reward.PassiveAbilityReward;
 import de.one_piece_content.ExampleMod;
 import de.one_piece_content_data.builder.OnePieceClassBuilder;
+import de.one_piece_content_data.data.Icon;
 import de.one_piece_content_data.registry.Entry;
 import de.one_piece_content_data.registry.Registries;
+import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.puffish.skillsmod.config.skill.SkillRewardConfig;
 
 import java.util.List;
 
@@ -34,14 +40,33 @@ import java.util.List;
  */
 public class ExampleClasses {
 
+
+    /**
+     * Swordsman Skill 2: Yakkodori.
+     */
+    public static final Entry<SkillDefinitionConfig> MASTER_OF_THE_SEAS = Registries.SKILL_DEFINITION.register(ExampleMod.id("master_of_the_seas"), masterOfTheSeas());
+    public static SkillDefinitionConfig masterOfTheSeas() {
+        SkillRewardConfig reward = new SkillRewardConfig(PassiveAbilityReward.ID, new PassiveAbilityReward(List.of(ExampleMod.id("master_of_the_seas"))));
+        return new SkillDefinitionConfig(Text.literal("Unlock MASTER_OF_THE_SEAS"),
+                Text.literal("[MASTER_OF_THE_SEAS Description text]"),
+                null,
+                Icon.item(Items.TROPICAL_FISH),
+                null,
+                1,
+                List.of(reward),
+                0, 0, 0, 0, 0
+        );
+    }
+    static {
+        ExampleSkills.register(MASTER_OF_THE_SEAS.id(), false, 0, 0, SkillType.CLASS);
+    }
+
+
     /**
      * Fishman class configuration.
      */
     public static final Entry<ClassConfig> FISHMAN = register("fishman", builder -> builder
-            .addReward(1,
-                    PassiveAbilityReward.ID,
-                    new PassiveAbilityReward(List.of(ExampleMod.id("master_of_the_seas")))
-            )
+            .addReward(1, MASTER_OF_THE_SEAS.id())
             .background(
                     ExampleMod.id("textures/classes/fishman.png"),
                     ExampleMod.id("textures/classes/fishman_name.png")

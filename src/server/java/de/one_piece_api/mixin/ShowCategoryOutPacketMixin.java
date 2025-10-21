@@ -1,6 +1,6 @@
 package de.one_piece_api.mixin;
 
-import de.one_piece_api.mixin_interface.IHidden;
+import de.one_piece_api.mixin_interface.ISkillTypeProvider;
 import de.one_piece_api.mixin_interface.StyledConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.puffish.skillsmod.common.SkillConnection;
@@ -33,8 +33,8 @@ public class ShowCategoryOutPacketMixin {
             remap = true  // Need to remap because PacketByteBuf is a Minecraft class
     )
     private static void write(PacketByteBuf buf, SkillConfig skill, CallbackInfo ci) {
-        IHidden styled = (IHidden) (Object) skill;
+        ISkillTypeProvider styled = (ISkillTypeProvider) (Object) skill;
         if (styled == null) return;
-        buf.writeBoolean(styled.onepiece$isHidden());
+        buf.writeEnumConstant(styled.onepiece$getSkillType());
     }
 }

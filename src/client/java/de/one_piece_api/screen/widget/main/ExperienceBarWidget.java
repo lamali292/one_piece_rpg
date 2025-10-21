@@ -1,4 +1,4 @@
-package de.one_piece_api.screen.widget;
+package de.one_piece_api.screen.widget.main;
 
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.init.MyFonts;
@@ -28,7 +28,7 @@ import java.util.function.Consumer;
  *     <li>Custom-styled level text using pixel font</li>
  *     <li>Animated experience progress bar</li>
  *     <li>Hover tooltip showing current/required XP</li>
- *     <li>Scalable layout for different screen sizes</li>
+ *     <li>Responsive scaling that matches screen dimensions</li>
  *     <li>Graceful handling of missing experience data</li>
  * </ul>
  *
@@ -56,14 +56,19 @@ public class ExperienceBarWidget implements Drawable, Element {
     /** Progress texture for the experience bar */
     private static final Identifier EXP_BAR_PROGRESS = Identifier.of("hud/experience_bar_progress");
 
-    /** Width of the experience bar in pixels */
-    private static final int EXP_BAR_WIDTH = 182;
+    /** Reference width of the experience bar in pixels */
+    private static final int EXP_BAR_REF_WIDTH = 850;
 
-    /** Height of the experience bar in pixels */
-    private static final int EXP_BAR_HEIGHT = 5;
+    /** Reference height of the experience bar in pixels */
+    private static final int EXP_BAR_REF_HEIGHT = 25;
 
-    /** Maximum width for the experience bar progress */
-    private static final int EXP_BAR_MAX_WIDTH = 183;
+    /** Reference max width for the experience bar progress */
+    private static final int EXP_BAR_REF_MAX_WIDTH = 850;
+
+    /** Reference image dimensions */
+    private static final int LEVEL_BAR_IMAGE_WIDTH = 1018;
+    private static final int LEVEL_BAR_IMAGE_HEIGHT = 31;
+    private static final int LEVEL_PART_IMAGE_WIDTH = 122;
 
     /** Color for the level text (white) */
     private static final int PRIMARY_TEXT_COLOR = 0xFFFFFFFF;
@@ -73,14 +78,14 @@ public class ExperienceBarWidget implements Drawable, Element {
     /** Text renderer for drawing level text */
     private final TextRenderer textRenderer;
 
-    /** Scaling factor for the widget */
-    private final float scale;
-
     /** X-coordinate where the widget is rendered */
     private int x;
 
     /** Y-coordinate where the widget is rendered */
     private int y;
+
+    /** Current scale factor */
+    private float currentScale;
 
     /** Scaled width of the level bar background */
     private int levelBarWidth;
@@ -90,6 +95,15 @@ public class ExperienceBarWidget implements Drawable, Element {
 
     /** Scaled width of the level text section */
     private int levelPartWidth;
+
+    /** Scaled experience bar width */
+    private int expBarWidth;
+
+    /** Scaled experience bar height */
+    private int expBarHeight;
+
+    /** Scaled experience bar max width */
+    private int expBarMaxWidth;
 
     /** Category data containing level and experience information */
     private ClientCategoryData categoryData;
@@ -103,31 +117,43 @@ public class ExperienceBarWidget implements Drawable, Element {
      * Creates a new experience bar widget.
      *
      * @param textRenderer the text renderer for drawing level text
-     * @param scale the scaling factor for the widget dimensions
+     * @param initialScale the initial scaling factor for the widget dimensions
      */
-    public ExperienceBarWidget(TextRenderer textRenderer, float scale) {
+    public ExperienceBarWidget(TextRenderer textRenderer, float initialScale) {
         this.textRenderer = textRenderer;
-        this.scale = scale;
+        this.currentScale = initialScale;
         calculateDimensions();
     }
 
     /**
      * Calculates scaled dimensions for the widget components.
      * <p>
-     * Applies the scale factor to the base image dimensions to determine
+     * Applies the current scale factor to the base image dimensions to determine
      * the actual render size of the level bar and its components.
      */
     private void calculateDimensions() {
-        final int LEVEL_BAR_IMAGE_WIDTH = 1018;
-        final int LEVEL_BAR_IMAGE_HEIGHT = 31;
-        final int LEVEL_PART_IMAGE_WIDTH = 122;
-
-        this.levelBarWidth = (int) (LEVEL_BAR_IMAGE_WIDTH * scale);
-        this.levelBarHeight = (int) (LEVEL_BAR_IMAGE_HEIGHT * scale);
-        this.levelPartWidth = (int) (LEVEL_PART_IMAGE_WIDTH * scale);
+        this.levelBarWidth = (int) (LEVEL_BAR_IMAGE_WIDTH * currentScale);
+        this.levelBarHeight = (int) (LEVEL_BAR_IMAGE_HEIGHT * currentScale);
+        this.levelPartWidth = (int) (LEVEL_PART_IMAGE_WIDTH * currentScale);
+        this.expBarWidth = (int) (EXP_BAR_REF_WIDTH * currentScale);
+        this.expBarHeight = (int) (EXP_BAR_REF_HEIGHT * currentScale);
+        this.expBarMaxWidth = (int) (EXP_BAR_REF_MAX_WIDTH * currentScale);
     }
 
     // ==================== Configuration ====================
+
+    /**
+     * Updates the scale factor and recalculates dimensions.
+     * <p>
+     * Call this when the screen is resized to ensure the widget
+     * scales properly with the rest of the UI.
+     *
+     * @param scale the new scale factor
+     */
+    public void updateScale(float scale) {
+        this.currentScale = scale;
+        calculateDimensions();
+    }
 
     /**
      * Sets the position where the widget should be rendered.
@@ -200,9 +226,9 @@ public class ExperienceBarWidget implements Drawable, Element {
         // Render level text
         renderLevelText(context, lvlX);
 
-        // Render experience bar
-        int barX = x + 42;
-        int barY = y + levelBarHeight / 2 - EXP_BAR_HEIGHT / 2;
+        // Render experience bar (scaled offset)
+        int barX = x + (int)(152 * currentScale);
+        int barY = y + levelBarHeight / 2 - expBarHeight / 2;
         renderExperienceBar(context, barX, barY);
 
         // Handle hover tooltip
@@ -245,19 +271,19 @@ public class ExperienceBarWidget implements Drawable, Element {
      */
     private void renderExperienceBar(DrawContext context, int barX, int barY) {
         // Background
-        context.drawGuiTexture(EXP_BAR_BACKGROUND, barX, barY, EXP_BAR_WIDTH, EXP_BAR_HEIGHT);
+        context.drawGuiTexture(EXP_BAR_BACKGROUND, barX, barY, expBarWidth, expBarHeight);
 
         // Progress
-        int progressWidth = Math.min(EXP_BAR_WIDTH,
-                (int) (categoryData.getExperienceProgress() * EXP_BAR_MAX_WIDTH));
+        int progressWidth = Math.min(expBarWidth,
+                (int) (categoryData.getExperienceProgress() * expBarMaxWidth));
 
         if (progressWidth > 0) {
             context.drawGuiTexture(
                     EXP_BAR_PROGRESS,
-                    EXP_BAR_WIDTH, EXP_BAR_HEIGHT,
+                    expBarWidth, expBarHeight,
                     0, 0,
                     barX, barY,
-                    progressWidth, EXP_BAR_HEIGHT
+                    progressWidth, expBarHeight
             );
         }
     }

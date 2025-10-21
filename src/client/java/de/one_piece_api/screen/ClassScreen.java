@@ -3,7 +3,7 @@ package de.one_piece_api.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import de.one_piece_api.OnePieceRPG;
 import de.one_piece_api.config.ClassConfig;
-import de.one_piece_api.screen.widget.ClassWidget;
+import de.one_piece_api.screen.widget.race.ClassWidget;
 import de.one_piece_api.network.payload.ClassConfigPayload;
 import de.one_piece_api.network.payload.SetClassPayload;
 import de.one_piece_api.init.MySounds;
@@ -122,9 +122,12 @@ public class ClassScreen extends Screen {
      * @param classConfigs map of class identifiers to their configurations
      */
     private void onClassConfigChange(Map<Identifier, ClassConfig> classConfigs) {
+        OnePieceRPG.debug(OnePieceRPG.LOADING_DATA,"ClassScreen.onClassConfigChange: Received {} classes", classConfigs.size());
+
         classWidgets.clear();
 
         if (classConfigs.isEmpty()) {
+            OnePieceRPG.LOGGER.warn("ClassScreen: No classes to display");
             return;
         }
 
@@ -132,6 +135,7 @@ public class ClassScreen extends Screen {
         int index = 0;
 
         for (Map.Entry<Identifier, ClassConfig> entry : classConfigs.entrySet()) {
+            OnePieceRPG.debug(OnePieceRPG.UI_UPDATE, "Creating widget for class: {}", entry.getKey());
             float offset = calculateWidgetOffset(index, classCount);
             ClassWidget widget = new ClassWidget(
                     entry.getKey(),
@@ -143,6 +147,7 @@ public class ClassScreen extends Screen {
             index++;
         }
 
+        OnePieceRPG.debug(OnePieceRPG.UI_UPDATE, "Created {} class widgets", classWidgets.size());
         updateWidgetLayout();
     }
 
@@ -178,6 +183,7 @@ public class ClassScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+
         dimensions.update(width, height);
         updateWidgetLayout();
 
@@ -185,6 +191,7 @@ public class ClassScreen extends Screen {
             // Stop all currently playing music
             client.getSoundManager().stopSounds(null, SoundCategory.MUSIC);
             client.getMusicTracker().stop();
+
             // Create and play GUI music
             music = new PositionedSoundInstance(
                     MySounds.AMBIENT.getId(),
@@ -202,7 +209,23 @@ public class ClassScreen extends Screen {
             client.getSoundManager().play(music);
         }
 
-        ClientPlayNetworking.send(new ClassConfigPayload.Request());
+        // FIXED: Check if configs are already loaded, if not, request them
+        ClientData.CLASS_CONFIG.get().ifPresentOrElse(
+                classConfigs -> {
+                    if (!classConfigs.isEmpty()) {
+                        OnePieceRPG.debug(OnePieceRPG.LOADING_DATA, "CLASS_CONFIG already loaded with {} entries, creating widgets",
+                                classConfigs.size());
+                        onClassConfigChange(classConfigs);
+                    } else {
+                        OnePieceRPG.debug(OnePieceRPG.LOADING_DATA, "CLASS_CONFIG is empty, requesting from server");
+                        ClientPlayNetworking.send(new ClassConfigPayload.Request());
+                    }
+                },
+                () -> {
+                    OnePieceRPG.debug(OnePieceRPG.LOADING_DATA,"CLASS_CONFIG not present, requesting from server");
+                    ClientPlayNetworking.send(new ClassConfigPayload.Request());
+                }
+        );
     }
 
     /**
@@ -266,6 +289,17 @@ public class ClassScreen extends Screen {
         renderBackground(context);
         renderWidgets(context, mouseX, mouseY, delta);
         renderTitle(context);
+
+        // DEBUG: Show widget count
+        if (client != null && classWidgets.isEmpty()) {
+            context.drawCenteredTextWithShadow(
+                    client.textRenderer,
+                    "Waiting for class data from server...",
+                    width / 2,
+                    height / 2,
+                    0xFFFFFF
+            );
+        }
     }
 
     /**
@@ -321,6 +355,10 @@ public class ClassScreen extends Screen {
      * @param delta the frame delta time
      */
     private void renderWidgets(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (classWidgets.isEmpty()) {
+            return;
+        }
+
         Optional<ClassWidget> hoveredWidget = findHoveredWidget(mouseX, mouseY);
         if (hovered != hoveredWidget.orElse(null)) {
             hovered = hoveredWidget.orElse(null);
@@ -337,11 +375,11 @@ public class ClassScreen extends Screen {
                 anyHovered = true;
             }
         }
+
         for (ClassWidget widget : classWidgets) {
             widget.setAnyHovered(anyHovered);
             widget.render(context, mouseX, mouseY, delta);
         }
-
     }
 
     /**

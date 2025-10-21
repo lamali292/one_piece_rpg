@@ -11,6 +11,9 @@ import de.one_piece_api.util.ClientData;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundEvents;
+import net.puffish.skillsmod.client.network.packets.in.ExperienceUpdateInPacket;
+import net.puffish.skillsmod.client.network.packets.in.PointsUpdateInPacket;
+import net.puffish.skillsmod.client.network.packets.in.SkillUpdateInPacket;
 
 /**
  * Handles client-side network packet processing for One Piece RPG mod.
@@ -32,10 +35,11 @@ public class ClientPacketHandler {
      * @param context the client networking context
      */
     public static void handleClassConfig(ClassConfigPayload classConfigPayload, ClientPlayNetworking.Context context) {
-        OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "Received class config: {}", classConfigPayload.configMap().keySet());
-
         var classConfig = classConfigPayload.configMap();
-        context.client().execute(() -> ClientData.CLASS_CONFIG.set(classConfig));
+        context.client().execute(() -> {
+            ClientData.CLASS_CONFIG.set(classConfig);
+            OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "CLASS_CONFIG loaded with {} entries", classConfig.size());
+        });
     }
 
     /**
@@ -79,12 +83,11 @@ public class ClientPacketHandler {
                                         2.0F  // Pitch
                                 )
                         );
-
                     }
+                    ClientData.invalidate(ClientData.DataInvalidationType.ALL);
                 }
             }
         });
-
     }
 
     /**
@@ -98,10 +101,29 @@ public class ClientPacketHandler {
      * @param context the client networking context
      */
     public static void handleSyncStyles(SyncStylesPayload payload, ClientPlayNetworking.Context context) {
-        OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "[Client Payload] loaded styles: {} ", payload.styles().keySet());
+        OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "loaded styles: {} ", payload.styles().keySet());
         context.client().execute(() -> {
             ClientStyleRegistry.setStyles(payload.styles());
         });
-
     }
+
+    public static void handlePointsUpdate(PointsUpdateInPacket payload) {
+        OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "puffish points update");
+        ClientData.invalidate(ClientData.DataInvalidationType.CATEGORY_DATA);
+    }
+
+    public static void handleExperienceUpdate(ExperienceUpdateInPacket payload) {
+        OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "puffish experience update");
+        ClientData.invalidate(ClientData.DataInvalidationType.CATEGORY_DATA);
+    }
+
+    public static void handleSkillUpdate(SkillUpdateInPacket payload) {
+        OnePieceRPG.debug(OnePieceRPG.CLIENT_PAYLOAD_MARKER, "puffish skill update");
+        ClientData.invalidate(ClientData.DataInvalidationType.CATEGORY_DATA);
+    }
+
+
+
+
+
 }

@@ -2,14 +2,13 @@ package de.one_piece_api;
 
 import de.one_piece_api.event.ClientEvents;
 import de.one_piece_api.init.*;
+import de.one_piece_api.render.DevilFruitItemRenderer;
+import de.one_piece_api.render.DevilFruitModelLoader;
 import de.one_piece_api.util.ClientData;
-import de.one_piece_api.render.TextureFramebufferCache;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
+import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.util.Identifier;
 
 /**
@@ -48,23 +47,19 @@ public class FabricClient implements ClientModInitializer {
         MyFonts.register();
         MySounds.register();
         ClientData.init();
-        ModelLoadingPlugin.register(e ->
-                e.addModels(Identifier.of(OnePieceRPG.MOD_ID, "fireball")));
-
-
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(
-                new SimpleSynchronousResourceReloadListener() {
-                    @Override
-                    public Identifier getFabricId() {
-                        return OnePieceRPG.id("texture_cache_clear");
-                    }
-                    @Override
-                    public void reload(ResourceManager manager) {
-                        TextureFramebufferCache.clearCache();
-                    }
-                }
-        );
+        ModelLoadingPlugin.register(e -> e.addModels(Identifier.of(OnePieceRPG.MOD_ID, "fireball")));
         ClientEvents.register();
+
+        PreparableModelLoadingPlugin.register(
+                DevilFruitModelLoader.DATA_LOADER,
+                new DevilFruitModelLoader()
+        );
+
+        BuiltinItemRendererRegistry.INSTANCE.register(
+                MyItems.DEVIL_FRUIT.item(),
+                new DevilFruitItemRenderer()
+        );
+
     }
 
 
